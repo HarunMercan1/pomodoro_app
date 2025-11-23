@@ -171,7 +171,7 @@ class HomeScreen extends StatelessWidget {
       title: title,
       minutes: time,
       // Basit bir mantık: Eğer seçilen süre butonun süresine eşitse 'seçili' yap (şimdilik manuel)
-      isSelected: false, // İleride burayı düzelteceğiz
+      isSelected: provider.currentDuration == time, // İleride burayı düzelteceğiz
       onTap: () => provider.setTime(time),
     );
   }

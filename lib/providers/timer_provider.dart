@@ -70,9 +70,8 @@ class TimerProvider with ChangeNotifier {
     return 1 - (_remainingSeconds / totalSeconds);
   }
 
-  // ... (yukarıdaki kodlar aynı kalacak) ...
+  int get currentDuration => _selectedTimeInMinutes;
 
-  // YENİ EKLENECEK KISIM:
   // Süreyi dışarıdan değiştirmemizi sağlayan fonksiyon
   void setTime(int minutes) {
     stopTimer(); // Önce sayacı durdur ki karışmasın
