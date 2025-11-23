@@ -1,107 +1,178 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/timer_provider.dart';
+import '../widgets/time_option_button.dart'; // Yeni widget'ımızı çağırdık
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Provider'ı dinlemeye başlıyoruz.
-    // context.watch: "TimerProvider'da bir değişiklik olursa bu sayfayı yeniden çiz" demek.
     final timerProvider = context.watch<TimerProvider>();
 
     return Scaffold(
+      backgroundColor: const Color(0xFFFAFAFA), // Kırık beyaz, göz yormaz
       appBar: AppBar(
-        title: const Text('Pomodoro'),
+        title: Text(
+          'Pomodoro',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.black87),
+        ),
         centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 1. KOCAMAN SAYAÇ
-            // 1. KOCAMAN SAYAÇ ve İLERLEME ÇUBUĞU
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                // Arkadaki silik çember (Pist)
-                SizedBox(
-                  width: 250,
-                  height: 250,
-                  child: CircularProgressIndicator(
-                    value: 1.0, // Hep dolu
-                    strokeWidth: 15,
-                    color: Colors.grey[300], // Silik gri renk
-                  ),
-                ),
-                // Öndeki dolan çember (Koşucu)
-                SizedBox(
-                  width: 250,
-                  height: 250,
-                  child: CircularProgressIndicator(
-                    value: timerProvider.progress, // Provider'dan gelen oran!
-                    strokeWidth: 15,
-                    color: Theme.of(context).primaryColor, // Temanın ana rengi
-                    strokeCap: StrokeCap.round, // Uçları yuvarlak olsun
-                  ),
-                ),
-                // Ortadaki Yazı
-                Text(
-                  timerProvider.timeLeftString,
-                  style: const TextStyle(
-                    fontSize: 50,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 50),
-            const SizedBox(height: 50), // Biraz boşluk
-
-            // 2. BUTONLAR
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Başlat / Duraklat Butonu
-                FloatingActionButton.large(
-                  onPressed: () {
-                    if (timerProvider.isRunning) {
-                      timerProvider.stopTimer();
-                    } else {
-                      timerProvider.startTimer();
-                    }
-                  },
-                  tooltip: timerProvider.isRunning ? 'Duraklat' : 'Başlat',
-                  child: Icon(
-                    timerProvider.isRunning ? Icons.pause : Icons.play_arrow,
-                    size: 40,
-                  ),
-                ),
-                const SizedBox(width: 20),
-
-                // Sıfırla Butonu (Sadece süre durmuşsa veya işlememişse görünsün opsiyonel, şimdilik hep koyalım)
-                FloatingActionButton(
-                  onPressed: () => timerProvider.resetTimer(),
-                  backgroundColor: Colors.red[100],
-                  elevation: 0,
-                  child: const Icon(Icons.refresh, color: Colors.red),
-                ),
-              ],
-            ),
-
-            // 3. DURUM BİLGİSİ (Çalışıyor mu?)
-            Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: Text(
-                timerProvider.isRunning ? "Hadi Bakalım, Odaklan! 💪" : "Hazır mısın?",
-                style: TextStyle(color: Colors.grey[600], fontSize: 16),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // 1. ÜST BUTONLAR (HİZALI VE EŞİT BOYDA)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            child: IntrinsicHeight( // <--- SİHİRLİ KOMUT BU! (En uzuna göre boy ayarlar)
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch, // <--- Hepsi yukarıdan aşağıya uzasın
+                children: [
+                  Expanded(child: _buildOption(context, timerProvider, "Focus", 25)),
+                  const SizedBox(width: 10),
+                  Expanded(child: _buildOption(context, timerProvider, "Short Break", 5)),
+                  const SizedBox(width: 10),
+                  Expanded(child: _buildOption(context, timerProvider, "Long Break", 15)),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+
+          const Spacer(),
+
+          // 2. ORTA SAYAÇ (MODERN GÖRÜNÜM)
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              // Gölge ve Derinlik Efekti
+              Container(
+                width: 280,
+                height: 280,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.15),
+                      blurRadius: 20,
+                      spreadRadius: 10,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+              ),
+              // İlerleme Çubuğu
+              SizedBox(
+                width: 260,
+                height: 260,
+                child: CircularProgressIndicator(
+                  value: timerProvider.progress,
+                  strokeWidth: 18,
+                  backgroundColor: const Color(0xFFF0F0F0),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF6C63FF)),
+                  strokeCap: StrokeCap.round,
+                ),
+              ),
+              // Sayaç Yazısı
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    timerProvider.timeLeftString,
+                    style: GoogleFonts.bebasNeue( // SAAT FONTU
+                      fontSize: 90,
+                      color: const Color(0xFF2D2D2D),
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  Text(
+                    timerProvider.isRunning ? "Odaklan" : "Hazır",
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.grey,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          const Spacer(),
+
+          // 3. ALT KONTROL BUTONLARI
+          Padding(
+            padding: const EdgeInsets.only(bottom: 50),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Başlat / Durdur (Büyük Buton)
+                GestureDetector(
+                  onTap: () {
+                    timerProvider.isRunning
+                        ? timerProvider.stopTimer()
+                        : timerProvider.startTimer();
+                  },
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF6C63FF),
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF6C63FF).withOpacity(0.4),
+                          blurRadius: 15,
+                          offset: const Offset(0, 8),
+                        )
+                      ],
+                    ),
+                    child: Icon(
+                      timerProvider.isRunning ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                      color: Colors.white,
+                      size: 40,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 25),
+
+                // Yenile Butonu (Küçük)
+                GestureDetector(
+                  onTap: () => timerProvider.resetTimer(),
+                  child: Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: const Icon(Icons.refresh_rounded, color: Colors.grey),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  // Yardımcı metot: Hangi sürenin seçili olduğunu anlamak için
+  // (Not: Bunu yapmak için TimerProvider'a şu an seçili olan dakikayı tutan bir değişken eklememiz gerekecek
+  // ama şimdilik görsel olarak hepsi aynı dursun, sonra orayı bağlarız.)
+  Widget _buildOption(BuildContext context, TimerProvider provider, String title, int time) {
+    return TimeOptionButton(
+      title: title,
+      minutes: time,
+      // Basit bir mantık: Eğer seçilen süre butonun süresine eşitse 'seçili' yap (şimdilik manuel)
+      isSelected: false, // İleride burayı düzelteceğiz
+      onTap: () => provider.setTime(time),
     );
   }
 }
