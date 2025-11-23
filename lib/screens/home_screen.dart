@@ -7,6 +7,7 @@ import '../providers/timer_provider.dart';
 import '../providers/settings_provider.dart';
 import '../screens/settings_screen.dart';
 import '../widgets/time_option_button.dart';
+import 'package:easy_localization/easy_localization.dart'; // <--- BUNU EKLE
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -73,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Pomodoro',
+          'title'.tr(),
           style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
@@ -104,11 +105,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(child: _buildOption(context, timerProvider, "Focus", 25)),
+                      Expanded(child: _buildOption(context, timerProvider, "focus".tr(), 25)),
                       const SizedBox(width: 10),
-                      Expanded(child: _buildOption(context, timerProvider, "Short Break", 5)),
+                      Expanded(child: _buildOption(context, timerProvider, "short_break".tr(), 5)),
                       const SizedBox(width: 10),
-                      Expanded(child: _buildOption(context, timerProvider, "Long Break", 15)),
+                      Expanded(child: _buildOption(context, timerProvider, "long_break".tr(), 15)),
                     ],
                   ),
                 ),

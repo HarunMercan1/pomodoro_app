@@ -1,0 +1,17 @@
+{
+  "title": "Pomodoro",
+  "focus": "Odaklan",
+  "short_break": "Kısa Mola",
+  "long_break": "Uzun Mola",
+  "ready": "Hazır mısın?",
+  "start_message": "Hadi Başlayalım! 🚀",
+  "congrats": "Tebrikler! 🎉",
+  "new_goal": "Yeni Hedef 🎯",
+  "settings_title": "Ayarlar",
+  "dark_mode": "Karanlık Mod",
+  "sound_label": "Bildirim Sesi",
+  "language_label": "Dil / Language",
+  "classic_bell": "Klasik Zil",
+  "digital": "Dijital",
+  "alarm": "Alarm"
+}

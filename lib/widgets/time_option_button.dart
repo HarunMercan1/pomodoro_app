@@ -18,14 +18,15 @@ class TimeOptionButton extends StatelessWidget {
   });
 
   @override
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        // 1. HAMLE: Yan boşlukları (horizontal) 20'den 8'e düşürdük. Yer açıldı!
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         decoration: BoxDecoration(
-          // Seçiliyse renkli, değilse şeffaf ama kenarlıklı
           color: isSelected ? const Color(0xFF6C63FF) : Colors.transparent,
           borderRadius: BorderRadius.circular(25),
           border: Border.all(
@@ -42,12 +43,17 @@ class TimeOptionButton extends StatelessWidget {
           ]
               : [],
         ),
-        child: Text(
-          title,
-          style: GoogleFonts.poppins(
-            color: isSelected ? Colors.white : Colors.grey.shade700,
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
+        // 2. HAMLE: FittedBox ekledik. Yazı sığmazsa küçülür ama asla aşağı taşmaz.
+        child: FittedBox(
+          fit: BoxFit.scaleDown, // Sadece gerekiyorsa küçült
+          child: Text(
+            title,
+            maxLines: 1, // Kesinlikle tek satır olacak
+            style: GoogleFonts.poppins(
+              color: isSelected ? Colors.white : Colors.grey.shade700,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
           ),
         ),
       ),

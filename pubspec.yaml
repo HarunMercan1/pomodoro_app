@@ -38,6 +38,7 @@ dependencies:
   google_fonts: ^6.3.2
   audioplayers: ^6.5.1
   confetti: ^0.8.0
+  easy_localization: ^3.0.8
 
 dev_dependencies:
   flutter_test:
@@ -59,7 +60,7 @@ flutter:
 
   assets:
     - assets/sounds/
-
+    - assets/translations/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

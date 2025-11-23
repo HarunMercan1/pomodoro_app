@@ -1,0 +1,17 @@
+{
+  "title": "Pomodoro",
+  "focus": "Focus",
+  "short_break": "Short Break",
+  "long_break": "Long Break",
+  "ready": "Are you ready?",
+  "start_message": "Let's Go! 🚀",
+  "congrats": "Congrats! 🎉",
+  "new_goal": "New Goal 🎯",
+  "settings_title": "Settings",
+  "dark_mode": "Dark Mode",
+  "sound_label": "Notification Sound",
+  "language_label": "Language",
+  "classic_bell": "Classic Bell",
+  "digital": "Digital",
+  "alarm": "Alarm"
+}
