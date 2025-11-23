@@ -1,17 +1,17 @@
 # 🍅 Focus Pomodoro App v1.0
 
+## 🇺🇸 English Description
+
 A modern, feature-rich Pomodoro timer application built with **Flutter**. Designed to boost productivity with a clean UI, customizable settings, and motivational features.
 
-> **[🇹🇷 Türkçe Açıklama için buraya tıklayın / Click here for Turkish version](#-focus-pomodoro-uygulaması)**
+> **[🇹🇷 Türkçe Açıklama için buraya tıklayın / Click here for Turkish version](#tr-readme)**
 
 ---
-
-## 🇺🇸 English Description
 
 ### 📸 Screenshots
 
 |          Home Screen          |             Dark Mode              |               Settings                |
-|:-----------------------------:|:----------------------------------:|:-------------------------------------:|
+| :---------------------------: | :--------------------------------: | :-----------------------------------: |
 | ![Home](screenshots/home.png) | ![Dark Mode](screenshots/dark.png) | ![Settings](screenshots/settings.png) |
 
 ### ✨ Features
@@ -36,14 +36,14 @@ A modern, feature-rich Pomodoro timer application built with **Flutter**. Design
 
 ---
 
-## 🇹🇷 Focus Pomodoro Uygulaması v1.0
+<h2 id="tr-readme">🇹🇷  Pomodoro Uygulaması v1.0 </h2>
 
 **Flutter** ile geliştirilmiş, modern ve zengin özelliklere sahip bir Pomodoro zamanlayıcı uygulaması. Temiz bir arayüz, özelleştirilebilir ayarlar ve motivasyon artırıcı özelliklerle üretkenliğinizi artırmak için tasarlandı.
 
 ### 📸 Ekran Görüntüleri
 
 |             Ana Ekran             |             Karanlık Mod              |               Ayarlar                |
-|:---------------------------------:|:-------------------------------------:|:------------------------------------:|
+| :-------------------------------: | :-----------------------------------: | :----------------------------------: |
 | ![Anasayfa](screenshots/home.png) | ![Karanlık Mod](screenshots/dark.png) | ![Ayarlar](screenshots/settings.png) |
 
 ### ✨ Özellikler
