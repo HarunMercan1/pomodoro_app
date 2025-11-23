@@ -3,7 +3,7 @@
   "focus": "Odaklan",
   "short_break": "Kısa Mola",
   "long_break": "Uzun Mola",
-  "ready": "Hazır mısın?",
+  "ready": "Hazır mısın? 💪",
   "start_message": "Hadi Başlayalım! 🚀",
   "congrats": "Tebrikler! 🎉",
   "new_goal": "Yeni Hedef 🎯",
@@ -13,5 +13,13 @@
   "language_label": "Dil / Language",
   "classic_bell": "Klasik Zil",
   "digital": "Dijital",
-  "alarm": "Alarm"
+  "alarm": "Alarm",
+  "quote_1": "Başlamak bitirmenin yarısıdır!",
+  "quote_2": "Bugün harika işler çıkaracaksın.",
+  "quote_3": "Odaklan ve başar.",
+  "quote_4": "Hayallerin için çalış.",
+  "quote_5": "Asla pes etme!",
+  "quote_6": "Gelecekteki sen sana teşekkür edecek.",
+  "quote_7": "Biraz daha gayret!",
+  "quote_8": "Sadece yap!"
 }

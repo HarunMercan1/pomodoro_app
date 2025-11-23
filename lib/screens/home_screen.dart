@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:confetti/confetti.dart';
-import 'dart:math'; // Yıldız çizimi için
+import 'dart:math';
 import '../providers/timer_provider.dart';
 import '../providers/settings_provider.dart';
 import '../screens/settings_screen.dart';
 import '../widgets/time_option_button.dart';
-import 'package:easy_localization/easy_localization.dart'; // <--- BUNU EKLE
+import 'package:easy_localization/easy_localization.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -161,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20), // Çok uzun söz olursa kenarlara yapışmasın
                         child: Text(
-                          timerProvider.currentMotivation, // <--- ARTIK BURASI DEĞİŞKEN
+                          timerProvider.currentMotivation.tr(), // <--- ARTIK BURASI DEĞİŞKEN
                           textAlign: TextAlign.center, // Uzun söz olursa ortalasın
                           style: GoogleFonts.poppins(
                             fontSize: 16,

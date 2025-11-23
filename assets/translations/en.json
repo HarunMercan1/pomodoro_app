@@ -3,7 +3,7 @@
   "focus": "Focus",
   "short_break": "Short Break",
   "long_break": "Long Break",
-  "ready": "Are you ready?",
+  "ready": "Are you ready? 💪",
   "start_message": "Let's Go! 🚀",
   "congrats": "Congrats! 🎉",
   "new_goal": "New Goal 🎯",
@@ -13,5 +13,13 @@
   "language_label": "Language",
   "classic_bell": "Classic Bell",
   "digital": "Digital",
-  "alarm": "Alarm"
+  "alarm": "Alarm",
+  "quote_1": "Well begun is half done!",
+  "quote_2": "You will do great things today.",
+  "quote_3": "Focus and succeed.",
+  "quote_4": "Work for your dreams.",
+  "quote_5": "Never give up!",
+  "quote_6": "Your future self will thank you.",
+  "quote_7": "Just a little more effort!",
+  "quote_8": "Just do it!"
 }
