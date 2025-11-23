@@ -35,7 +35,7 @@ class TimerProvider with ChangeNotifier {
   void startTimer(String soundPath) {
     if (_timer != null) return;
 
-    _timer = Timer.periodic(const Duration(milliseconds: 10), (timer) async { // async yaptık çünkü ses çalacağız
+    _timer = Timer.periodic(const Duration(milliseconds: 1), (timer) async { // async yaptık çünkü ses çalacağız
       if (_remainingSeconds > 0) {
         _remainingSeconds--;
         _isRunning = true;

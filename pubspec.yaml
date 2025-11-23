@@ -37,6 +37,7 @@ dependencies:
   provider: ^6.1.5+1
   google_fonts: ^6.3.2
   audioplayers: ^6.5.1
+  confetti: ^0.8.0
 
 dev_dependencies:
   flutter_test:
