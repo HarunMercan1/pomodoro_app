@@ -157,12 +157,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           letterSpacing: 2,
                         ),
                       ),
-                      Text(
-                        timerProvider.isRunning ? "Odaklan" : "Hazır",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                          letterSpacing: 1.5,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20), // Çok uzun söz olursa kenarlara yapışmasın
+                        child: Text(
+                          timerProvider.currentMotivation, // <--- ARTIK BURASI DEĞİŞKEN
+                          textAlign: TextAlign.center, // Uzun söz olursa ortalasın
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                            letterSpacing: 1.0, // Biraz kıstık ki sığsın
+                          ),
                         ),
                       ),
                     ],
