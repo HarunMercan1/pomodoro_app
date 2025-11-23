@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   provider: ^6.1.5+1
   google_fonts: ^6.3.2
+  audioplayers: ^6.5.1
 
 dev_dependencies:
   flutter_test:
@@ -53,11 +54,10 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/sounds/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

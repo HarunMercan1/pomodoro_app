@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class TimerProvider with ChangeNotifier {
   // Varsayılan süreler (Dakika cinsinden)
   static const int defaultWorkTime = 25;
   static const int defaultShortBreak = 5;
   static const int defaultLongBreak = 15;
+  final AudioPlayer _audioPlayer = AudioPlayer(); // Ses oynatıcımız
 
   // Anlık sayaç süresi (Saniye cinsinden tutacağız, yönetmesi kolay olsun)
   int _remainingSeconds = defaultWorkTime * 60;
@@ -30,26 +32,33 @@ class TimerProvider with ChangeNotifier {
 
   // --- FONKSİYONLAR ---
 
-  void startTimer() {
-    if (_timer != null) return; // Zaten çalışıyorsa tekrar başlatma
+  void startTimer(String soundPath) {
+    if (_timer != null) return;
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(milliseconds: 10), (timer) async { // async yaptık çünkü ses çalacağız
       if (_remainingSeconds > 0) {
         _remainingSeconds--;
         _isRunning = true;
-        notifyListeners(); // Arayüze "Hey süre değişti, ekranı güncelle!" diyoruz.
+        notifyListeners();
       } else {
-        stopTimer();
+        stopTimer(reset: false); // Durdur ama resetleme (00:00 görünsün)
         _isRunning = false;
-        // Burada ileride ses çalma veya bildirim gönderme kodu olacak.
+
+        // --- SES ÇALMA ANI ---
+        // soundPath bize 'bell.mp3' olarak gelecek.
+        // Ama asset klasörümüz 'assets/sounds/bell.mp3'.
+        // AudioPlayer paketi 'assets/' kısmını kendi halleder, biz 'sounds/...' diyeceğiz.
+        await _audioPlayer.play(AssetSource('sounds/$soundPath'));
+
         notifyListeners();
       }
     });
   }
 
-  void stopTimer() {
+  void stopTimer({bool reset = true}) {
     _timer?.cancel();
     _timer = null;
+    _audioPlayer.stop(); // <--- SESİ DE KES!
     _isRunning = false;
     notifyListeners();
   }

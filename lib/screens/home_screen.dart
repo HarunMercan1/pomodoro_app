@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/timer_provider.dart';
-import '../widgets/time_option_button.dart'; // Yeni widget'ımızı çağırdık
+import '../providers/settings_provider.dart'; // Settings'e erişmek için
+import '../screens/settings_screen.dart';
+import '../widgets/time_option_button.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -10,27 +12,41 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final timerProvider = context.watch<TimerProvider>();
+    final settingsProvider = context.watch<SettingsProvider>();
+    // SettingsProvider'ı buraya ekleyelim ki currentDuration'ı oradan almayalım,
+    // timerProvider zaten süreyi yönetiyor, sorun yok.
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA), // Kırık beyaz, göz yormaz
+      // backgroundColor SATIRINI SİLDİK! Artık main.dart'taki temadan otomatik alacak.
       appBar: AppBar(
         title: Text(
           'Pomodoro',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.black87),
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // 1. ÜST BUTONLAR (HİZALI VE EŞİT BOYDA)
+          // 1. ÜST BUTONLAR
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            child: IntrinsicHeight( // <--- SİHİRLİ KOMUT BU! (En uzuna göre boy ayarlar)
+            child: IntrinsicHeight(
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch, // <--- Hepsi yukarıdan aşağıya uzasın
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(child: _buildOption(context, timerProvider, "Focus", 25)),
                   const SizedBox(width: 10),
@@ -44,20 +60,21 @@ class HomeScreen extends StatelessWidget {
 
           const Spacer(),
 
-          // 2. ORTA SAYAÇ (MODERN GÖRÜNÜM)
+          // 2. ORTA SAYAÇ
           Stack(
             alignment: Alignment.center,
             children: [
-              // Gölge ve Derinlik Efekti
+              // Gölge ve Derinlik Efekti (Dinamik Renk)
               Container(
                 width: 280,
                 height: 280,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white,
+                  // BURASI DEĞİŞTİ: Sabit beyaz yerine Tema'nın kart rengini kullandık
+                  color: Theme.of(context).cardColor,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.15),
+                      color: Colors.black.withOpacity(0.05), // Gölgeyi biraz yumuşattık
                       blurRadius: 20,
                       spreadRadius: 10,
                       offset: const Offset(0, 10),
@@ -72,8 +89,11 @@ class HomeScreen extends StatelessWidget {
                 child: CircularProgressIndicator(
                   value: timerProvider.progress,
                   strokeWidth: 18,
-                  backgroundColor: const Color(0xFFF0F0F0),
-                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF6C63FF)),
+                  // Arka plan izi dinamik olsun (açık modda gri, koyu modda daha koyu gri)
+                  backgroundColor: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey.shade800
+                      : const Color(0xFFF0F0F0),
+                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
                   strokeCap: StrokeCap.round,
                 ),
               ),
@@ -83,9 +103,10 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Text(
                     timerProvider.timeLeftString,
-                    style: GoogleFonts.bebasNeue( // SAAT FONTU
+                    style: GoogleFonts.bebasNeue(
                       fontSize: 90,
-                      color: const Color(0xFF2D2D2D),
+                      // BURASI DEĞİŞTİ: Sabit siyah yerine "OnSurface" (Zemin üstü yazı) rengi
+                      color: Theme.of(context).colorScheme.onSurface,
                       letterSpacing: 2,
                     ),
                   ),
@@ -93,7 +114,8 @@ class HomeScreen extends StatelessWidget {
                     timerProvider.isRunning ? "Odaklan" : "Hazır",
                     style: GoogleFonts.poppins(
                       fontSize: 16,
-                      color: Colors.grey,
+                      // BURASI DEĞİŞTİ: Biraz saydamlık verdik, her zemine uyar
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                       letterSpacing: 1.5,
                     ),
                   ),
@@ -110,22 +132,25 @@ class HomeScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Başlat / Durdur (Büyük Buton)
+                // Play Butonu
                 GestureDetector(
                   onTap: () {
-                    timerProvider.isRunning
-                        ? timerProvider.stopTimer()
-                        : timerProvider.startTimer();
+                    if (timerProvider.isRunning) {
+                      timerProvider.stopTimer();
+                    } else {
+                      // HAH! İŞTE BURADA AYARLARDAKİ SESİ GÖNDERİYORUZ
+                      timerProvider.startTimer(settingsProvider.selectedSound);
+                    }
                   },
                   child: Container(
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF6C63FF),
+                      color: Theme.of(context).primaryColor, // Temadan al
                       borderRadius: BorderRadius.circular(25),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF6C63FF).withOpacity(0.4),
+                          color: Theme.of(context).primaryColor.withOpacity(0.4),
                           blurRadius: 15,
                           offset: const Offset(0, 8),
                         )
@@ -141,18 +166,25 @@ class HomeScreen extends StatelessWidget {
 
                 const SizedBox(width: 25),
 
-                // Yenile Butonu (Küçük)
+                // Reset Butonu
                 GestureDetector(
                   onTap: () => timerProvider.resetTimer(),
                   child: Container(
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      // Dinamik renk
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(
+                          color: Theme.of(context).dividerColor.withOpacity(0.1)
+                      ),
                     ),
-                    child: const Icon(Icons.refresh_rounded, color: Colors.grey),
+                    child: Icon(
+                        Icons.refresh_rounded,
+                        // İkon rengi de dinamik
+                        color: Theme.of(context).iconTheme.color?.withOpacity(0.7) ?? Colors.grey
+                    ),
                   ),
                 ),
               ],
@@ -163,15 +195,11 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Yardımcı metot: Hangi sürenin seçili olduğunu anlamak için
-  // (Not: Bunu yapmak için TimerProvider'a şu an seçili olan dakikayı tutan bir değişken eklememiz gerekecek
-  // ama şimdilik görsel olarak hepsi aynı dursun, sonra orayı bağlarız.)
   Widget _buildOption(BuildContext context, TimerProvider provider, String title, int time) {
     return TimeOptionButton(
       title: title,
       minutes: time,
-      // Basit bir mantık: Eğer seçilen süre butonun süresine eşitse 'seçili' yap (şimdilik manuel)
-      isSelected: provider.currentDuration == time, // İleride burayı düzelteceğiz
+      isSelected: provider.currentDuration == time,
       onTap: () => provider.setTime(time),
     );
   }
