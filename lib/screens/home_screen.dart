@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+// Google Fonts importunu kaldırdık
 import 'package:provider/provider.dart';
 import 'package:confetti/confetti.dart';
 import 'dart:math';
@@ -24,12 +24,10 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _confettiController = ConfettiController(duration: const Duration(seconds: 2));
 
-    // TimerProvider'ı dinle, süre 0 olunca konfeti patlat
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TimerProvider>().addListener(() {
         if (!mounted) return;
         final provider = context.read<TimerProvider>();
-        // Eğer süre 0 ise ve konfeti henüz oynamıyorsa -> PATLAT
         if (provider.remainingSeconds == 0 &&
             provider.currentDuration != 0 &&
             _confettiController.state != ConfettiControllerState.playing) {
@@ -45,7 +43,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  /// Yıldız şekli çizen fonksiyon (Konfeti için)
   Path drawStar(Size size) {
     double degToRad(double deg) => deg * (pi / 180.0);
     const numberOfPoints = 5;
@@ -69,13 +66,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final timerProvider = context.watch<TimerProvider>();
-    final settingsProvider = context.read<SettingsProvider>(); // Sadece okumak için
+    final settingsProvider = context.read<SettingsProvider>();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'title'.tr(),
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          // GÜNCELLEME: GoogleFonts yerine yerel font
+          style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w600
+          ),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -95,7 +96,6 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         alignment: Alignment.topCenter,
         children: [
-          // UYGULAMA İÇERİĞİ
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -152,21 +152,25 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Text(
                         timerProvider.timeLeftString,
-                        style: GoogleFonts.bebasNeue(
+                        // GÜNCELLEME: Bebas Neue yerel font
+                        style: TextStyle(
+                          fontFamily: 'BebasNeue',
                           fontSize: 90,
                           color: Theme.of(context).colorScheme.onSurface,
                           letterSpacing: 2,
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20), // Çok uzun söz olursa kenarlara yapışmasın
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Text(
-                          timerProvider.currentMotivation.tr(), // <--- ARTIK BURASI DEĞİŞKEN
-                          textAlign: TextAlign.center, // Uzun söz olursa ortalasın
-                          style: GoogleFonts.poppins(
+                          timerProvider.currentMotivation.tr(),
+                          textAlign: TextAlign.center,
+                          // GÜNCELLEME: Poppins yerel font
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
                             fontSize: 16,
                             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                            letterSpacing: 1.0, // Biraz kıstık ki sığsın
+                            letterSpacing: 1.0,
                           ),
                         ),
                       ),
@@ -233,8 +237,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-
-          // KONFETİ WIDGET (YILDIZLI)
           ConfettiWidget(
             confettiController: _confettiController,
             blastDirectionality: BlastDirectionality.explosive,
@@ -242,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
             colors: const [
               Colors.green, Colors.blue, Colors.pink, Colors.orange, Colors.purple
             ],
-            createParticlePath: drawStar, // Yıldız fonksiyonunu bağladık
+            createParticlePath: drawStar,
           ),
         ],
       ),

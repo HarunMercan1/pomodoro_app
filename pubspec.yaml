@@ -35,6 +35,19 @@ flutter:
     - assets/translations/
     - assets/icon/
 
+  fonts:
+    - family: BebasNeue
+      fonts:
+        - asset: assets/fonts/BebasNeue-Regular.ttf
+
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Poppins-Light.ttf
+          weight: 300
+
 # --- İKON AYARLARI ---
 flutter_launcher_icons:
   android: "launcher_icon"

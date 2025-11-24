@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+// Google Fonts importu kaldırıldı
 import 'package:provider/provider.dart';
 import '../providers/timer_provider.dart';
 
@@ -7,7 +7,7 @@ class TimeOptionButton extends StatelessWidget {
   final String title;
   final int minutes;
   final VoidCallback onTap;
-  final bool isSelected; // Seçili mi diye kontrol edeceğiz
+  final bool isSelected;
 
   const TimeOptionButton({
     super.key,
@@ -18,13 +18,11 @@ class TimeOptionButton extends StatelessWidget {
   });
 
   @override
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         alignment: Alignment.center,
-        // 1. HAMLE: Yan boşlukları (horizontal) 20'den 8'e düşürdük. Yer açıldı!
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF6C63FF) : Colors.transparent,
@@ -43,13 +41,14 @@ class TimeOptionButton extends StatelessWidget {
           ]
               : [],
         ),
-        // 2. HAMLE: FittedBox ekledik. Yazı sığmazsa küçülür ama asla aşağı taşmaz.
         child: FittedBox(
-          fit: BoxFit.scaleDown, // Sadece gerekiyorsa küçült
+          fit: BoxFit.scaleDown,
           child: Text(
             title,
-            maxLines: 1, // Kesinlikle tek satır olacak
-            style: GoogleFonts.poppins(
+            maxLines: 1,
+            // GÜNCELLEME: GoogleFonts yerine yerel asset fontu
+            style: TextStyle(
+              fontFamily: 'Poppins',
               color: isSelected ? Colors.white : Colors.grey.shade700,
               fontWeight: FontWeight.w600,
               fontSize: 14,
