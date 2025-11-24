@@ -40,6 +40,7 @@ dependencies:
   confetti: ^0.8.0
   easy_localization: ^3.0.8
   shared_preferences: ^2.5.3
+  wakelock_plus: ^1.4.0
 
 dev_dependencies:
   flutter_test:

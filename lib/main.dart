@@ -4,12 +4,21 @@ import 'package:easy_localization/easy_localization.dart'; // <--- PAKETİ EKLED
 import 'providers/timer_provider.dart';
 import 'providers/settings_provider.dart';
 import 'screens/home_screen.dart';
+import 'package:wakelock_plus/wakelock_plus.dart'; // <--- BUNU EKLE
 
 // main artık async çünkü dil yüklemesini bekleyeceğiz
 void main() async {
   // Flutter motorunu manuel çalıştırıyoruz (Dil yüklenmeden hata vermesin diye)
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+
+  // --- EKRANI AÇIK TUTMA EMRİ ---
+  // Bu komut, uygulama açık olduğu sürece ekranın kararmasını engeller.
+  try {
+    await WakelockPlus.enable();
+  } catch (e) {
+    debugPrint('Wakelock hatası: $e');
+  }
 
   runApp(
     EasyLocalization(
