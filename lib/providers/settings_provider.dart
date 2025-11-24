@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart'; // <--- YENİ PAKET
 
 class SettingsProvider with ChangeNotifier {
   // Varsayılan Ayarlar
-  bool _isDarkMode = false;
+  bool _isDarkMode = true;
   String _selectedSound = 'digital.mp3'; // Varsayılan ses
 
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -30,7 +30,7 @@ class SettingsProvider with ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
 
     // Defterden oku, eğer kayıt yoksa varsayılanı (?? false) kullan
-    _isDarkMode = _prefs.getBool('isDarkMode') ?? false;
+    _isDarkMode = _prefs.getBool('isDarkMode') ?? true;
     _selectedSound = _prefs.getString('selectedSound') ?? 'digital.mp3';
 
     notifyListeners(); // Ekranı güncelle

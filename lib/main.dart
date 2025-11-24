@@ -5,6 +5,7 @@ import 'providers/timer_provider.dart';
 import 'providers/settings_provider.dart';
 import 'screens/home_screen.dart';
 import 'package:wakelock_plus/wakelock_plus.dart'; // <--- BUNU EKLE
+import 'screens/splash_screen.dart';
 
 // main artık async çünkü dil yüklemesini bekleyeceğiz
 void main() async {
@@ -78,7 +79,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }
