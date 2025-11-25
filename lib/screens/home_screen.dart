@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// Google Fonts importunu kaldırdık
 import 'package:provider/provider.dart';
 import 'package:confetti/confetti.dart';
 import 'dart:math';
@@ -45,11 +44,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Path drawStar(Size size) {
     double degToRad(double deg) => deg * (pi / 180.0);
+    // ignore: unused_local_variable
     const numberOfPoints = 5;
     final halfWidth = size.width / 2;
     final externalRadius = halfWidth;
     final internalRadius = halfWidth / 2.5;
-    final degreesPerStep = degToRad(360 / numberOfPoints);
+    final degreesPerStep = degToRad(360 / 5);
     final halfDegreesPerStep = degreesPerStep / 2;
     final path = Path();
     final fullAngle = degToRad(360);
@@ -66,16 +66,15 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final timerProvider = context.watch<TimerProvider>();
-    final settingsProvider = context.read<SettingsProvider>();
+    final settingsProvider = context.watch<SettingsProvider>();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'title'.tr(),
-          // GÜNCELLEME: GoogleFonts yerine yerel font
           style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w600
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: true,
@@ -105,11 +104,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(child: _buildOption(context, timerProvider, "focus".tr(), 25)),
+                      // --- GÜNCELLEME: ARTIK MOD BİLGİSİ DE GÖNDERİYORUZ (TimerMode) ---
+                      Expanded(child: _buildOption(context, timerProvider, "focus".tr(), settingsProvider.workTime, TimerMode.work)),
                       const SizedBox(width: 10),
-                      Expanded(child: _buildOption(context, timerProvider, "short_break".tr(), 5)),
+                      Expanded(child: _buildOption(context, timerProvider, "short_break".tr(), settingsProvider.shortBreakTime, TimerMode.shortBreak)),
                       const SizedBox(width: 10),
-                      Expanded(child: _buildOption(context, timerProvider, "long_break".tr(), 15)),
+                      Expanded(child: _buildOption(context, timerProvider, "long_break".tr(), settingsProvider.longBreakTime, TimerMode.longBreak)),
                     ],
                   ),
                 ),
@@ -152,7 +152,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Text(
                         timerProvider.timeLeftString,
-                        // GÜNCELLEME: Bebas Neue yerel font
                         style: TextStyle(
                           fontFamily: 'BebasNeue',
                           fontSize: 90,
@@ -165,7 +164,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Text(
                           timerProvider.currentMotivation.tr(),
                           textAlign: TextAlign.center,
-                          // GÜNCELLEME: Poppins yerel font
                           style: TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 16,
@@ -251,12 +249,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildOption(BuildContext context, TimerProvider provider, String title, int time) {
+  // GÜNCELLEME: mode parametresi eklendi
+  Widget _buildOption(BuildContext context, TimerProvider provider, String title, int time, TimerMode mode) {
     return TimeOptionButton(
       title: title,
       minutes: time,
-      isSelected: provider.currentDuration == time,
-      onTap: () => provider.setTime(time),
+      // Artık süreye değil, moda göre seçili olup olmadığını anlıyoruz (daha güvenli)
+      isSelected: provider.currentMode == mode,
+      onTap: () => provider.setTime(time, mode),
     );
   }
 }

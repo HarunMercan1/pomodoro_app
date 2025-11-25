@@ -55,9 +55,9 @@ v1.1 ile artık **çok daha Premium!**
 
 ## 📸 Ekran Görüntüleri
 
-| Açılış Ekranı                   | Anasayfa                           | Ayarlar                               |
-| ------------------------------- | ---------------------------------- | ------------------------------------- |
-| ![Home](screenshots/splash.png) | ![Dark Mode](screenshots/dark.png) | ![Settings](screenshots/settings.png) |
+| Açılış Ekranı                   | Anasayfa                            | Ayarlar                               |
+| ------------------------------- | ----------------------------------- | ------------------------------------- |
+| ![Home](screenshots/splash.png) | ![Dark Mode](screenshots/darkk.png) | ![Settings](screenshots/settings.png) |
 
 ---
 
