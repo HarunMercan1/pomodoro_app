@@ -27,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context.read<TimerProvider>().addListener(() {
         if (!mounted) return;
         final provider = context.read<TimerProvider>();
+        // Eğer süre bittiyse (ve 0 ise) konfeti patlat
         if (provider.remainingSeconds == 0 &&
             provider.currentDuration != 0 &&
             _confettiController.state != ConfettiControllerState.playing) {
@@ -44,7 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Path drawStar(Size size) {
     double degToRad(double deg) => deg * (pi / 180.0);
-    // ignore: unused_local_variable
     const numberOfPoints = 5;
     final halfWidth = size.width / 2;
     final externalRadius = halfWidth;
@@ -104,7 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // --- GÜNCELLEME: ARTIK MOD BİLGİSİ DE GÖNDERİYORUZ (TimerMode) ---
                       Expanded(child: _buildOption(context, timerProvider, "focus".tr(), settingsProvider.workTime, TimerMode.work)),
                       const SizedBox(width: 10),
                       Expanded(child: _buildOption(context, timerProvider, "short_break".tr(), settingsProvider.shortBreakTime, TimerMode.shortBreak)),
@@ -177,56 +176,98 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const Spacer(),
+
+              // --- YENİLENMİŞ BUTON ALANI ---
               Padding(
-                padding: const EdgeInsets.only(bottom: 50),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                padding: const EdgeInsets.only(bottom: 40),
+                child: Column(
                   children: [
+                    // --- ANA AKSİYON BUTONU ---
                     GestureDetector(
                       onTap: () {
-                        if (timerProvider.isRunning) {
-                          timerProvider.stopTimer();
+                        if (timerProvider.isAlarmPlaying) {
+                          // Alarm çalıyorsa -> Sustur ve Bitir
+                          timerProvider.stopAlarm();
+                        } else if (timerProvider.isRunning) {
+                          // Sayaç çalışıyorsa -> Duraklat
+                          timerProvider.stopTimer(reset: false);
                         } else {
+                          // Durmuşsa veya hiç başlamamışsa -> Başlat
                           timerProvider.startTimer(settingsProvider.selectedSound);
                         }
                       },
-                      child: Container(
-                        width: 80,
-                        height: 80,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(25),
+                          // Duruma göre renk
+                          color: timerProvider.isAlarmPlaying
+                              ? Colors.green // Alarm = Yeşil
+                              : timerProvider.isRunning
+                              ? Colors.orangeAccent // Çalışıyor = Turuncu
+                              : Theme.of(context).primaryColor, // Bekliyor = Tema Rengi
+                          borderRadius: BorderRadius.circular(50),
                           boxShadow: [
                             BoxShadow(
-                              color: Theme.of(context).primaryColor.withOpacity(0.4),
-                              blurRadius: 15,
+                              color: (timerProvider.isAlarmPlaying
+                                  ? Colors.green
+                                  : timerProvider.isRunning
+                                  ? Colors.orangeAccent
+                                  : Theme.of(context).primaryColor)
+                                  .withOpacity(0.4),
+                              blurRadius: 20,
                               offset: const Offset(0, 8),
                             )
                           ],
                         ),
-                        child: Icon(
-                          timerProvider.isRunning ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                          color: Colors.white,
-                          size: 40,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              timerProvider.isAlarmPlaying
+                                  ? Icons.check_rounded
+                                  : timerProvider.isRunning
+                                  ? Icons.pause_rounded
+                                  : Icons.play_arrow_rounded,
+                              color: Colors.white,
+                              size: 32,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              timerProvider.isAlarmPlaying
+                                  ? "stop_alarm".tr() // BİTİR
+                                  : timerProvider.isRunning
+                                  ? "pause".tr() // DURAKLAT
+                                  : (timerProvider.remainingSeconds < timerProvider.currentDuration * 60)
+                                  ? "resume".tr() // DEVAM ET
+                                  : "start".tr(), // BAŞLAT
+                              style: const TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(width: 25),
-                    GestureDetector(
-                      onTap: () => timerProvider.resetTimer(),
-                      child: Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                              color: Theme.of(context).dividerColor.withOpacity(0.1)
+
+                    const SizedBox(height: 20),
+
+                    // --- SIFIRLAMA BUTONU (Metin Halinde) ---
+                    Visibility(
+                      visible: !timerProvider.isAlarmPlaying &&
+                          timerProvider.remainingSeconds != timerProvider.currentDuration * 60,
+                      child: GestureDetector(
+                        onTap: () => timerProvider.resetTimer(),
+                        child: Text(
+                          "reset".tr(),
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            color: Theme.of(context).dividerColor,
+                            fontWeight: FontWeight.w500,
                           ),
-                        ),
-                        child: Icon(
-                            Icons.refresh_rounded,
-                            color: Theme.of(context).iconTheme.color?.withOpacity(0.7) ?? Colors.grey
                         ),
                       ),
                     ),
@@ -249,12 +290,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // GÜNCELLEME: mode parametresi eklendi
   Widget _buildOption(BuildContext context, TimerProvider provider, String title, int time, TimerMode mode) {
     return TimeOptionButton(
       title: title,
       minutes: time,
-      // Artık süreye değil, moda göre seçili olup olmadığını anlıyoruz (daha güvenli)
       isSelected: provider.currentMode == mode,
       onTap: () => provider.setTime(time, mode),
     );

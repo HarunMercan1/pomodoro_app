@@ -2,24 +2,27 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import '../utils/notification_service.dart';
-import 'package:easy_localization/easy_localization.dart'; // Çeviri için
+import 'package:easy_localization/easy_localization.dart';
+import '../utils/notification_service.dart'; // Bildirim servisi
 
-// Zamanlayıcı Modları (Hangi durumdayız?)
+// Zamanlayıcı Modları
 enum TimerMode { work, shortBreak, longBreak }
 
 class TimerProvider with ChangeNotifier {
-  // Varsayılan değerler (Başlangıç için)
+  // Varsayılan değerler
   static const int defaultWorkTime = 25;
 
   int _remainingSeconds = defaultWorkTime * 60;
   int _selectedTimeInMinutes = defaultWorkTime;
-  TimerMode _currentMode = TimerMode.work; // Varsayılan mod Odaklanma
-
+  TimerMode _currentMode = TimerMode.work;
   String _currentMotivation = "start_message";
 
   Timer? _timer;
   bool _isRunning = false;
+
+  // --- YENİ: Alarm çalıyor mu kontrolü ---
+  bool _isAlarmPlaying = false;
+
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   // Getterlar
@@ -27,7 +30,8 @@ class TimerProvider with ChangeNotifier {
   bool get isRunning => _isRunning;
   String get currentMotivation => _currentMotivation;
   int get currentDuration => _selectedTimeInMinutes;
-  TimerMode get currentMode => _currentMode; // Dışarıdan modu okumak için
+  TimerMode get currentMode => _currentMode;
+  bool get isAlarmPlaying => _isAlarmPlaying;
 
   double get progress {
     if (_selectedTimeInMinutes == 0) return 0;
@@ -55,23 +59,33 @@ class TimerProvider with ChangeNotifier {
   void startTimer(String soundPath) {
     if (_timer != null) return;
 
+    if (_isAlarmPlaying) {
+      stopAlarm();
+      return;
+    }
+
+    // --- DÜZELTME BURADA ---
+    // Sayacın içine girmeden ÖNCE durumu güncelle ki buton anında değişsin.
+    _isRunning = true;
     _changeQuote();
     notifyListeners();
+    // -----------------------
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (_remainingSeconds > 0) {
         _remainingSeconds--;
-        _isRunning = true;
+        // _isRunning = true; // Buradan sildik, zaten yukarıda true yaptık.
         notifyListeners();
       } else {
+        // --- SÜRE BİTTİ ---
         stopTimer(reset: false);
         _isRunning = false;
+        _isAlarmPlaying = true;
         _currentMotivation = "congrats";
 
-        // --- BİLDİRİM GÖNDER ---
         NotificationService().showNotification(
-          title: 'congrats'.tr(), // "Tebrikler!"
-          body: 'ready'.tr(),     // "Hazır mısın?" (veya başka bir mesaj)
+          title: 'congrats'.tr(),
+          body: 'ready'.tr(),
         );
 
         try {
@@ -84,11 +98,20 @@ class TimerProvider with ChangeNotifier {
     });
   }
 
+  // YENİ: Alarmı Susturma Fonksiyonu
+  void stopAlarm() {
+    _audioPlayer.stop();
+    _isAlarmPlaying = false;
+    resetTimer(); // Alarm susunca sayacı başa sar
+    notifyListeners();
+  }
+
   void stopTimer({bool reset = true}) {
     _timer?.cancel();
     _timer = null;
     _audioPlayer.stop();
     _isRunning = false;
+    _isAlarmPlaying = false; // Garanti olsun
     notifyListeners();
   }
 
@@ -96,23 +119,23 @@ class TimerProvider with ChangeNotifier {
     stopTimer();
     _remainingSeconds = _selectedTimeInMinutes * 60;
     _currentMotivation = "ready";
+    _isAlarmPlaying = false;
     notifyListeners();
   }
 
-  // SÜRE VE MOD DEĞİŞTİRME (Ana Ekrandan Çağrılır)
   void setTime(int minutes, TimerMode mode) {
     stopTimer();
     _selectedTimeInMinutes = minutes;
     _remainingSeconds = minutes * 60;
-    _currentMode = mode; // Modu güncelle
+    _currentMode = mode;
     _currentMotivation = "new_goal";
+    _isAlarmPlaying = false;
     notifyListeners();
   }
 
-  // AYARLARDAN GELEN GÜNCELLEME (Anlık Değişim İçin)
-  // Eğer sayaç çalışmıyorsa ve değiştirilen ayar şu anki mod ise, süreyi güncelle.
+  // Ayarlardan gelen güncelleme
   void updateDurationFromSettings(int newMinutes, TimerMode mode) {
-    if (_isRunning) return; // Çalışıyorsa elleme, adamın konsantrasyonu bozulmasın
+    if (_isRunning) return;
 
     if (_currentMode == mode) {
       _selectedTimeInMinutes = newMinutes;

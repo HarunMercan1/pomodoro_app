@@ -22,5 +22,10 @@
   "quote_6": "Your future self will thank you.",
   "quote_7": "Just a little more effort!",
   "quote_8": "Just do it!",
-  "duration_settings": "Duration Settings"
+  "duration_settings": "Duration Settings",
+  "reset": "Reset",
+  "start": "START",
+  "pause": "PAUSE",
+  "resume": "RESUME",
+  "stop_alarm": "FINISH"
 }

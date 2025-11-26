@@ -22,5 +22,10 @@
   "quote_6": "Gelecekteki sen sana teşekkür edecek.",
   "quote_7": "Biraz daha gayret!",
   "quote_8": "Sadece yap!",
-  "duration_settings": "Süre Ayarları"
+  "duration_settings": "Süre Ayarları",
+  "reset": "Sıfırla",
+  "start": "BAŞLAT",
+  "pause": "DURAKLAT",
+  "resume": "DEVAM ET",
+  "stop_alarm": "BİTİR"
 }
