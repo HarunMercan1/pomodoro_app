@@ -4,19 +4,34 @@ import 'package:easy_localization/easy_localization.dart';
 import '../providers/settings_provider.dart';
 import '../providers/timer_provider.dart';
 
-class DurationSettingsScreen extends StatelessWidget {
+class DurationSettingsScreen extends StatefulWidget {
   const DurationSettingsScreen({super.key});
 
   @override
+  State<DurationSettingsScreen> createState() => _DurationSettingsScreenState();
+}
+
+class _DurationSettingsScreenState extends State<DurationSettingsScreen> {
+  // Slider değerlerini anlık olarak tutacak yerel değişkenler
+  // Provider'ı her milisaniyede yormamak için.
+  double? _tempWorkTime;
+  double? _tempShortBreak;
+  double? _tempLongBreak;
+
+  @override
   Widget build(BuildContext context) {
-    // Hem Ayarları hem de Timer'ı dinliyoruz/yönetiyoruz
     final settings = context.watch<SettingsProvider>();
     final timerProvider = context.read<TimerProvider>();
+
+    // Eğer yerel değişkenler null ise (ilk açılış), provider'dan al
+    double currentWork = _tempWorkTime ?? settings.workTime.toDouble();
+    double currentShort = _tempShortBreak ?? settings.shortBreakTime.toDouble();
+    double currentLong = _tempLongBreak ?? settings.longBreakTime.toDouble();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "duration_settings".tr(), // JSON'a ekleyeceğiz
+          "duration_settings".tr(),
           style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
@@ -34,14 +49,18 @@ class DurationSettingsScreen extends StatelessWidget {
           _buildDurationSlider(
             context,
             label: "focus".tr(),
-            value: settings.workTime,
+            value: currentWork,
             min: 10,
-            max: 90, // 90 dakikaya kadar çıkabilsin
+            max: 90,
             onChanged: (val) {
+              setState(() => _tempWorkTime = val); // Sadece ekranı güncelle (HIZLI)
+            },
+            onChangeEnd: (val) {
+              // Parmak çekilince kaydet (AĞIR İŞLEM)
               int newValue = val.toInt();
               settings.setWorkTime(newValue);
-              // ANLIK GÜNCELLEME SİNYALİ
               timerProvider.updateDurationFromSettings(newValue, TimerMode.work);
+              _tempWorkTime = null; // Yerel değeri sıfırla
             },
           ),
 
@@ -51,14 +70,17 @@ class DurationSettingsScreen extends StatelessWidget {
           _buildDurationSlider(
             context,
             label: "short_break".tr(),
-            value: settings.shortBreakTime,
+            value: currentShort,
             min: 1,
             max: 30,
             onChanged: (val) {
+              setState(() => _tempShortBreak = val);
+            },
+            onChangeEnd: (val) {
               int newValue = val.toInt();
               settings.setShortBreakTime(newValue);
-              // ANLIK GÜNCELLEME SİNYALİ
               timerProvider.updateDurationFromSettings(newValue, TimerMode.shortBreak);
+              _tempShortBreak = null;
             },
           ),
 
@@ -68,14 +90,17 @@ class DurationSettingsScreen extends StatelessWidget {
           _buildDurationSlider(
             context,
             label: "long_break".tr(),
-            value: settings.longBreakTime,
+            value: currentLong,
             min: 5,
             max: 45,
             onChanged: (val) {
+              setState(() => _tempLongBreak = val);
+            },
+            onChangeEnd: (val) {
               int newValue = val.toInt();
               settings.setLongBreakTime(newValue);
-              // ANLIK GÜNCELLEME SİNYALİ
               timerProvider.updateDurationFromSettings(newValue, TimerMode.longBreak);
+              _tempLongBreak = null;
             },
           ),
         ],
@@ -86,10 +111,11 @@ class DurationSettingsScreen extends StatelessWidget {
   Widget _buildDurationSlider(
       BuildContext context, {
         required String label,
-        required int value,
+        required double value,
         required double min,
         required double max,
         required Function(double) onChanged,
+        required Function(double) onChangeEnd, // Yeni parametre
       }) {
     return Card(
       elevation: 0,
@@ -108,7 +134,7 @@ class DurationSettingsScreen extends StatelessWidget {
                     style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, fontSize: 16)
                 ),
                 Text(
-                    "$value dk",
+                    "${value.toInt()} dk",
                     style: TextStyle(
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.bold,
@@ -126,13 +152,13 @@ class DurationSettingsScreen extends StatelessWidget {
                 overlayShape: const RoundSliderOverlayShape(overlayRadius: 24.0),
               ),
               child: Slider(
-                value: value.toDouble(),
+                value: value,
                 min: min,
                 max: max,
-                // divisions: ...  <--- BU SATIRI SİLDİK! ARTIK NOKTA YOK, KAYMAK GİBİ.
                 activeColor: Theme.of(context).primaryColor,
                 inactiveColor: Theme.of(context).primaryColor.withOpacity(0.2),
-                onChanged: onChanged,
+                onChanged: onChanged, // Anlık değişim (görsel)
+                onChangeEnd: onChangeEnd, // Kayıt işlemi
               ),
             ),
           ],
