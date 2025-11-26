@@ -7,13 +7,12 @@ plugins {
 android {
     namespace = "com.harunresitmercan.pomodoro_app"
     compileSdk = flutter.compileSdkVersion
-
-    // --- DÜZELTME BURADA ---
-    // flutter.ndkVersion yerine direkt istenen sürümü yazdık:
     ndkVersion = "27.0.12077973"
-    // -----------------------
 
     compileOptions {
+        // --- BURASI EKLENDİ: Desugaring açıldı ---
+        isCoreLibraryDesugaringEnabled = true
+
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -39,4 +38,9 @@ android {
 
 flutter {
     source = "../.."
+}
+
+// --- BURASI EKLENDİ: Desugar kütüphanesi ---
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }

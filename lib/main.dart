@@ -6,12 +6,15 @@ import 'providers/settings_provider.dart';
 import 'screens/home_screen.dart';
 import 'package:wakelock_plus/wakelock_plus.dart'; // <--- BUNU EKLE
 import 'screens/splash_screen.dart';
+import 'utils/notification_service.dart';
 
 // main artık async çünkü dil yüklemesini bekleyeceğiz
 void main() async {
   // Flutter motorunu manuel çalıştırıyoruz (Dil yüklenmeden hata vermesin diye)
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+
+  await NotificationService().init();
 
   // --- EKRANI AÇIK TUTMA EMRİ ---
   // Bu komut, uygulama açık olduğu sürece ekranın kararmasını engeller.

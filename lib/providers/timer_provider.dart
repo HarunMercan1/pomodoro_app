@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import '../utils/notification_service.dart';
+import 'package:easy_localization/easy_localization.dart'; // Çeviri için
 
 // Zamanlayıcı Modları (Hangi durumdayız?)
 enum TimerMode { work, shortBreak, longBreak }
@@ -65,6 +67,13 @@ class TimerProvider with ChangeNotifier {
         stopTimer(reset: false);
         _isRunning = false;
         _currentMotivation = "congrats";
+
+        // --- BİLDİRİM GÖNDER ---
+        NotificationService().showNotification(
+          title: 'congrats'.tr(), // "Tebrikler!"
+          body: 'ready'.tr(),     // "Hazır mısın?" (veya başka bir mesaj)
+        );
+
         try {
           await _audioPlayer.play(AssetSource('sounds/$soundPath'));
         } catch (e) {
