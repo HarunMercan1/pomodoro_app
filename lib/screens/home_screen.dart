@@ -149,6 +149,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const Spacer(),
+
+                  // --- ORTA ALAN (DAİRE ve SAYAÇ) ---
                   Stack(
                     alignment: Alignment.center,
                     children: [
@@ -171,19 +173,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
-                      // --- PROGRESS BAR (YAĞ GİBİ AKAN VERSİYON) ---
+                      // Progress Bar (Fluid Animation)
                       SizedBox(
                         width: 260,
                         height: 260,
-                        // TweenAnimationBuilder ile saniye geçişlerini dolduruyoruz
                         child: TweenAnimationBuilder<double>(
                           tween: Tween<double>(
                               begin: 0.0,
                               end: timerProvider.progress
                           ),
-                          // Duration'ı tam 1 saniye yapıyoruz ki bir sonraki güncellemeye kadar aksın
                           duration: const Duration(seconds: 1),
-                          // Linear yapıyoruz ki takılmadan dümdüz ilerlesin (Ease kullanırsak nefes alır gibi olur)
                           curve: Curves.linear,
                           builder: (context, value, _) {
                             return CircularProgressIndicator(
@@ -192,7 +191,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               backgroundColor: isTimerRunning
                                   ? Colors.white.withOpacity(0.15)
                                   : (isDark ? Colors.grey.shade800 : const Color(0xFFF0F0F0)),
-
                               valueColor: AlwaysStoppedAnimation<Color>(
                                   isTimerRunning
                                       ? accentColor
@@ -203,39 +201,49 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         ),
                       ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            timerProvider.timeLeftString,
-                            style: TextStyle(
-                              fontFamily: 'BebasNeue',
-                              fontSize: 90,
-                              color: isTimerRunning
-                                  ? Colors.white
-                                  : Theme.of(context).colorScheme.onSurface,
-                              letterSpacing: 2,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Text(
-                              timerProvider.currentMotivation.tr(),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 16,
-                                color: isTimerRunning
-                                    ? Colors.white.withOpacity(0.9)
-                                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                          ),
-                        ],
+                      // SADECE SÜRE YAZISI
+                      Text(
+                        timerProvider.timeLeftString,
+                        style: TextStyle(
+                          fontFamily: 'BebasNeue',
+                          fontSize: 100,
+                          color: isTimerRunning
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.onSurface,
+                          letterSpacing: 2,
+                        ),
                       ),
                     ],
                   ),
+
+                  const SizedBox(height: 20),
+
+                  // --- MOTİVASYON SÖZÜ (SABİT ALAN - ZIPLAMA YOK) ---
+                  Container(
+                    height: 80, // Yükseklik sabitlendi!
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    alignment: Alignment.center, // Ortala
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 500),
+                      child: Text(
+                        timerProvider.currentMotivation.tr(),
+                        key: ValueKey<String>(timerProvider.currentMotivation),
+                        textAlign: TextAlign.center,
+                        maxLines: 3, // En fazla 3 satır olsun
+                        overflow: TextOverflow.ellipsis, // Taşarsa ... koysun
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: isTimerRunning
+                              ? Colors.white.withOpacity(0.9)
+                              : Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ),
+
                   const Spacer(),
 
                   Padding(

@@ -45,10 +45,10 @@ class TimerProvider with ChangeNotifier {
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
-  final List<String> _quotes = [
-    "quote_1", "quote_2", "quote_3", "quote_4",
-    "quote_5", "quote_6", "quote_7", "quote_8",
-  ];
+  // --- GÜNCELLEME: OTOMATİK LİSTE OLUŞTURMA ---
+  // Tek tek "quote_1", "quote_2"... yazmak yerine döngüyle üretiyoruz.
+  final List<String> _quotes = List.generate(50, (index) => "quote_${index + 1}");
+  // ---------------------------------------------
 
   void _changeQuote() {
     _currentMotivation = _quotes[Random().nextInt(_quotes.length)];
