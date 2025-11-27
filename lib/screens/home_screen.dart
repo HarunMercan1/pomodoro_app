@@ -254,7 +254,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         GestureDetector(
                           onTap: () {
                             if (timerProvider.isAlarmPlaying) {
-                              timerProvider.stopAlarm();
+                              // --- GÜNCELLEME BURADA ---
+                              // Bitir'e basınca sıradaki moda geçmek için süreleri gönderiyoruz
+                              timerProvider.stopAlarm(
+                                workTime: settingsProvider.workTime,
+                                shortBreakTime: settingsProvider.shortBreakTime,
+                                longBreakTime: settingsProvider.longBreakTime,
+                              );
                             } else if (timerProvider.isRunning) {
                               timerProvider.stopTimer(reset: false);
                             } else {
@@ -262,6 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             }
                           },
                           child: AnimatedContainer(
+                            // ... burası aynı (tasarım kodu) ...
                             duration: const Duration(milliseconds: 300),
                             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                             decoration: BoxDecoration(
@@ -289,7 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ? Icons.pause_rounded
                                       : Icons.play_arrow_rounded,
                                   color: timerProvider.isRunning && !timerProvider.isAlarmPlaying
-                                      ? darkNavy
+                                      ? const Color(0xFF1A2980)
                                       : Colors.white,
                                   size: 32,
                                 ),
@@ -307,7 +314,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                     color: timerProvider.isRunning && !timerProvider.isAlarmPlaying
-                                        ? darkNavy
+                                        ? const Color(0xFF1A2980)
                                         : Colors.white,
                                   ),
                                 ),
