@@ -8,12 +8,14 @@ class SettingsProvider with ChangeNotifier {
 
   // --- AYARLAR ---
   bool _isDarkMode = true;
-  String _notificationSound = 'digital.mp3';
+
+  // Varsayılan Bildirim Sesi (YENİ)
+  String _notificationSound = 'zil1.mp3';
+
   bool _isBackgroundMusicEnabled = false;
-  String _backgroundMusic = 'rain.mp3';
+  String _backgroundMusic = 'rain1.mp3';
   double _backgroundVolume = 0.5;
 
-  // Süreler
   int _workTime = 25;
   int _shortBreakTime = 5;
   int _longBreakTime = 15;
@@ -29,32 +31,24 @@ class SettingsProvider with ChangeNotifier {
   int get shortBreakTime => _shortBreakTime;
   int get longBreakTime => _longBreakTime;
 
+  // --- 1. BİLDİRİM SESLERİ (YENİ DOSYA İSİMLERİNE GÖRE) ---
   final Map<String, String> notificationSounds = {
-    'digital.mp3': 'Zil 1',
-    'alarm.mp3': 'Zil 2',
-    'bell.mp3': 'Zil 3',
-    'bell2.mp3': 'Zil 4',
-    'bell3.mp3': 'Zil 5',
-    'bell4.mp3': 'Zil 6',
-    'bell5.mp3': 'Zil 7',
-    'bell6.mp3': 'Zil 8',
-    'bell7.mp3': 'Zil 9',
-    'bell8.mp3': 'Zil 10',
-    'bell9.mp3': 'Zil 11',
+    'zil1.mp3': 'Zil 1',
+    'zil2.mp3': 'Zil 2',
+    'zil3.mp3': 'Zil 3',
+    'zil4.mp3': 'Zil 4',
+    'zil5.mp3': 'Zil 5',
   };
 
+  // --- 2. ARKA PLAN MÜZİKLERİ (ÖNCEKİ GİBİ KALDI) ---
   final Map<String, String> backgroundMusics = {
-    'rain.mp3': 'Yağmur',
-    'rain2.mp3': 'Sağanak',
-    'rain3.mp3': 'Hafif Çise',
-    'rain4.mp3': 'Camda Yağmur',
-    'rainandthunder.mp3': 'Fırtına',
-    'forest.mp3': 'Orman',
-    'forest2.mp3': 'Kuş Sesleri',
-    'forest3.mp3': 'Derin Doğa',
-    'ocean.mp3': 'Okyanus',
-    'ocean2.mp3': 'Sahil',
+    'rain2.mp3': 'Çiseleyen Yağmur',
+    'rain1.mp3': 'Orman Yağmuru',
+    'rain3.mp3': 'Sağanak',
+    'thunder.mp3': 'Fırtına',
     'wind.mp3': 'Rüzgar',
+    'forest.mp3': 'Orman',
+    'ocean.mp3': 'Okyanus',
   };
 
   SettingsProvider() {
@@ -64,9 +58,16 @@ class SettingsProvider with ChangeNotifier {
   Future<void> _loadSettings() async {
     _prefs = await SharedPreferences.getInstance();
     _isDarkMode = _prefs.getBool('isDarkMode') ?? true;
-    _notificationSound = _prefs.getString('notificationSound') ?? 'digital.mp3';
+
+    // Eğer kayıtlı ses artık yoksa 'zil1.mp3'e dön
+    String loadedNotif = _prefs.getString('notificationSound') ?? 'zil1.mp3';
+    _notificationSound = notificationSounds.containsKey(loadedNotif) ? loadedNotif : 'zil1.mp3';
+
     _isBackgroundMusicEnabled = _prefs.getBool('isBackgroundMusicEnabled') ?? false;
-    _backgroundMusic = _prefs.getString('backgroundMusic') ?? 'rain.mp3';
+
+    String loadedMusic = _prefs.getString('backgroundMusic') ?? 'rain1.mp3';
+    _backgroundMusic = backgroundMusics.containsKey(loadedMusic) ? loadedMusic : 'rain1.mp3';
+
     _backgroundVolume = _prefs.getDouble('backgroundVolume') ?? 0.5;
     _workTime = _prefs.getInt('workTime') ?? 25;
     _shortBreakTime = _prefs.getInt('shortBreakTime') ?? 5;
@@ -80,51 +81,58 @@ class SettingsProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // --- BİLDİRİM SESİ SEÇME (PLAY METODU İLE GARANTİ ÇALMA) ---
   Future<void> setNotificationSound(String soundPath) async {
     _notificationSound = soundPath;
     _prefs.setString('notificationSound', soundPath);
     notifyListeners();
-    await _previewPlayer.stop();
-    await _previewPlayer.setSource(AssetSource('sounds/bell/$soundPath'));
-    await _previewPlayer.setVolume(1.0);
-    await _previewPlayer.setReleaseMode(ReleaseMode.stop);
-    await _previewPlayer.resume();
+
+    debugPrint("🔔 Zil Deneniyor: sounds/bell/$soundPath");
+
+    try {
+      await _previewPlayer.stop();
+      await _previewPlayer.setReleaseMode(ReleaseMode.stop);
+
+      // 'play' metodu anlık çalma için daha kararlıdır
+      await _previewPlayer.play(
+        AssetSource('sounds/bell/$soundPath'),
+        volume: 1.0,
+      );
+    } catch (e) {
+      debugPrint("❌ Zil Hatası: $e");
+    }
   }
 
+  // --- MÜZİK SEÇME ---
   Future<void> setBackgroundMusic(String soundPath) async {
     _backgroundMusic = soundPath;
     _prefs.setString('backgroundMusic', soundPath);
     notifyListeners();
+
     if (_isBackgroundMusicEnabled) {
-      await _previewPlayer.stop();
-      await _previewPlayer.setSource(AssetSource('sounds/music/$soundPath'));
-      await _previewPlayer.setVolume(_backgroundVolume);
-      await _previewPlayer.setReleaseMode(ReleaseMode.loop);
-      await _previewPlayer.resume();
+      try {
+        await _previewPlayer.stop();
+        await _previewPlayer.setSource(AssetSource('sounds/music/$soundPath'));
+        await _previewPlayer.setVolume(_backgroundVolume);
+        await _previewPlayer.setReleaseMode(ReleaseMode.loop);
+        await _previewPlayer.resume();
+      } catch (e) {
+        debugPrint("❌ Müzik Hatası: $e");
+      }
     }
   }
 
-  // --- SES AYARLARI (GÜNCELLENDİ) ---
-
-  // 1. Canlı Değişim (Slider oynarken çağrılır - EKRANI YENİLEMEZ)
   void setVolumeLive(double volume) {
     _backgroundVolume = volume;
-    // notifyListeners() ÇAĞIRMIYORUZ! (Kasma sebebi buydu)
-
-    // Player sesini anlık güncelle
     if (_previewPlayer.state == PlayerState.playing) {
       _previewPlayer.setVolume(volume);
     }
   }
 
-  // 2. Kayıt (Parmak çekilince çağrılır)
   void saveVolumeToPrefs() {
     _prefs.setDouble('backgroundVolume', _backgroundVolume);
-    // Burada notifyListeners çağırabiliriz ki diğer ekranlar haberdar olsun
     notifyListeners();
   }
-
-  // ------------------------------------
 
   void toggleBackgroundMusic(bool value) async {
     _isBackgroundMusicEnabled = value;

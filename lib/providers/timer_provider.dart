@@ -21,7 +21,6 @@ class TimerProvider with ChangeNotifier {
   bool _isAlarmPlaying = false;
   int _completedRounds = 0;
 
-  // Çift Player: Biri müzik, biri alarm için
   final AudioPlayer _alarmPlayer = AudioPlayer();
   final AudioPlayer _musicPlayer = AudioPlayer();
 
@@ -52,11 +51,10 @@ class TimerProvider with ChangeNotifier {
     _currentMotivation = _quotes[Random().nextInt(_quotes.length)];
   }
 
-  // --- BAŞLATMA ---
+  // --- START TIMER ---
   void startTimer(SettingsProvider settings) async {
     if (_timer != null) return;
 
-    // Alarm çalıyorsa sadece sustur, başlatma
     if (_isAlarmPlaying) {
       _alarmPlayer.stop();
       _isAlarmPlaying = false;
@@ -69,19 +67,19 @@ class TimerProvider with ChangeNotifier {
     _changeQuote();
     notifyListeners();
 
-    // MÜZİK BAŞLAT (Eğer açıksa)
+    // MÜZİK BAŞLAT
     if (settings.isBackgroundMusicEnabled) {
       try {
         await _musicPlayer.setSource(AssetSource('sounds/music/${settings.backgroundMusic}'));
         await _musicPlayer.setVolume(settings.backgroundVolume);
-        await _musicPlayer.setReleaseMode(ReleaseMode.loop); // Sonsuz döngü
+        await _musicPlayer.setReleaseMode(ReleaseMode.loop);
         await _musicPlayer.resume();
       } catch (e) {
-        debugPrint("Müzik hatası: $e");
+        debugPrint("❌ Müzik Çalma Hatası: $e");
       }
     }
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+    _timer = Timer.periodic(const Duration(milliseconds: 1), (timer) async {
       if (_remainingSeconds > 0) {
         _remainingSeconds--;
         notifyListeners();
@@ -103,18 +101,22 @@ class TimerProvider with ChangeNotifier {
           body: 'ready'.tr(),
         );
 
+        // --- ALARMI ÇAL (GÜVENLİ YÖNTEM) ---
         try {
-          // ALARMI ÇAL (bell klasöründen)
-          await _alarmPlayer.play(AssetSource('sounds/bell/${settings.notificationSound}'));
+          debugPrint("🔔 Alarm Çalıyor: sounds/bell/${settings.notificationSound}");
+          await _alarmPlayer.stop();
+          await _alarmPlayer.setSource(AssetSource('sounds/bell/${settings.notificationSound}'));
+          await _alarmPlayer.setVolume(1.0); // Alarm hep full ses
+          await _alarmPlayer.setReleaseMode(ReleaseMode.stop); // Tek seferlik
+          await _alarmPlayer.resume();
         } catch (e) {
-          debugPrint("Alarm hatası: $e");
+          debugPrint("❌ Alarm Hatası: $e");
         }
         notifyListeners();
       }
     });
   }
 
-  // --- ALARMI DURDUR & SONRAKİ TURA GEÇ ---
   void stopAlarm({
     required int workTime,
     required int shortBreakTime,
@@ -124,7 +126,6 @@ class TimerProvider with ChangeNotifier {
     _musicPlayer.stop();
     _isAlarmPlaying = false;
 
-    // Otomatik Geçiş Mantığı
     if (_currentMode == TimerMode.work) {
       if (_completedRounds % 4 == 0 && _completedRounds != 0) {
         setTime(longBreakTime, TimerMode.longBreak);
@@ -174,7 +175,6 @@ class TimerProvider with ChangeNotifier {
     }
   }
 
-  // Anlık Ses Ayarı (Slider oynarken)
   void updateMusicVolume(double volume) {
     if (_isRunning) {
       _musicPlayer.setVolume(volume);
