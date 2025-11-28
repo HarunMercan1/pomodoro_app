@@ -5,6 +5,11 @@ class TimeOptionButton extends StatelessWidget {
   final int minutes;
   final VoidCallback onTap;
   final bool isSelected;
+  final bool isLightMode;
+
+  // YENİ PARAMETRELER: Rengi dışarıdan alıyoruz
+  final Color? activeBackgroundColor;
+  final Color? activeTextColor;
 
   const TimeOptionButton({
     super.key,
@@ -12,24 +17,49 @@ class TimeOptionButton extends StatelessWidget {
     required this.minutes,
     required this.onTap,
     this.isSelected = false,
+    this.isLightMode = false,
+    this.activeBackgroundColor,
+    this.activeTextColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    const Color darkNavy = Color(0xFF1A2980);
+
+    Color textColor;
+    Color borderColor;
+    Color backgroundColor;
+
+    if (isLightMode) {
+      // --- AYDINLIK MOD (Boşta) ---
+      backgroundColor = isSelected ? darkNavy : Colors.transparent;
+      textColor = isSelected ? Colors.white : darkNavy.withOpacity(0.8);
+      borderColor = isSelected ? Colors.transparent : darkNavy.withOpacity(0.2);
+    } else {
+      // --- GRADYANLI MODLAR (Çalışıyor/Durdu/Bitti) ---
+      // Seçiliyse dışarıdan gelen rengi kullan (Yoksa beyaz yap)
+      backgroundColor = isSelected
+          ? (activeBackgroundColor ?? Colors.white)
+          : Colors.white.withOpacity(0.15);
+
+      // Yazı rengi de dışarıdan geliyor
+      textColor = isSelected
+          ? (activeTextColor ?? darkNavy)
+          : Colors.white.withOpacity(0.9);
+
+      borderColor = isSelected ? Colors.transparent : Colors.white.withOpacity(0.2);
+    }
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          // Seçiliyse BEYAZ, Değilse Şeffaf Beyaz (Cam Efekti)
-          color: isSelected
-              ? Colors.white
-              : Colors.white.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(30), // Tam yuvarlak köşeler (Hap şekli)
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            // Seçili değilse ince bir beyaz çizgi, seçiliyse gerek yok
-            color: isSelected ? Colors.transparent : Colors.white.withOpacity(0.2),
+            color: borderColor,
             width: 1,
           ),
           boxShadow: isSelected
@@ -52,19 +82,17 @@ class TimeOptionButton extends StatelessWidget {
                 maxLines: 1,
                 style: TextStyle(
                   fontFamily: 'Poppins',
-                  // Seçiliyse Koyu Lacivert, değilse Beyaz
-                  color: isSelected ? const Color(0xFF1A2980) : Colors.white.withOpacity(0.9),
+                  color: textColor,
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
               ),
-              // Dakikayı göstermek istemezsen burayı silebilirsin ama şık durur
               Text(
                 "$minutes dk",
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 10,
-                  color: isSelected ? const Color(0xFF1A2980).withOpacity(0.7) : Colors.white.withOpacity(0.6),
+                  color: textColor.withOpacity(0.8), // Opacity artırıldı
                 ),
               ),
             ],
