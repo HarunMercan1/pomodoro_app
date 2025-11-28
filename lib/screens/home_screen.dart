@@ -68,12 +68,39 @@ class _HomeScreenState extends State<HomeScreen> {
     final settingsProvider = context.watch<SettingsProvider>();
 
     final bool isTimerRunning = timerProvider.isRunning;
+    final bool isAlarmPlaying = timerProvider.isAlarmPlaying; // Yeni durum kontrolü
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final Color defaultBgColor = Theme.of(context).scaffoldBackgroundColor;
 
+    // --- RESPONSIVE AYARLAR ---
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final bool isSmallScreen = screenHeight < 700;
+
+    final double circleSize = isSmallScreen ? 250 : 300;
+    final double timerFontSize = circleSize * 0.28;
+
+    final double buttonPaddingVertical = isSmallScreen ? 12 : 16;
+    final double buttonPaddingHorizontal = isSmallScreen ? 30 : 40;
+
     // --- RENK PALETİ ---
-    const Color accentColor = Color(0xFF64FFDA); // Buzlu Nane
-    const Color darkNavy = Color(0xFF1A2980);    // Koyu Lacivert
+    const Color accentColor = Color(0xFF64FFDA);
+    const Color darkNavy = Color(0xFF1A2980);
+
+    // --- GRADYAN RENKLERİ ---
+    // 1. Çalışırken (Mavi/Turkuaz)
+    const List<Color> runningGradient = [
+      Color(0xFF1A2980),
+      Color(0xFF26D0CE),
+    ];
+
+    // 2. Bittiğinde/Alarm (Zafer Moru)
+    const List<Color> finishedGradient = [
+      Color(0xFF8E2DE2), // Derin Mor
+      Color(0xFF4A00E0), // Parlak İndigo
+    ];
+
+    // 3. Dururken (Düz Renk)
+    final List<Color> idleGradient = [defaultBgColor, defaultBgColor];
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -85,14 +112,15 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(
             fontFamily: 'Poppins',
             fontWeight: FontWeight.w600,
-            color: isTimerRunning ? Colors.white : null,
+            // Alarm veya Timer çalışıyorsa yazı beyaz olsun
+            color: (isTimerRunning || isAlarmPlaying) ? Colors.white : null,
           ),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(
-            color: isTimerRunning ? Colors.white : null
+            color: (isTimerRunning || isAlarmPlaying) ? Colors.white : null
         ),
         actions: [
           IconButton(
@@ -107,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
-      // --- ANİMASYONLU ARKA PLAN ---
+      // --- ANİMASYONLU ARKA PLAN (3 AŞAMALI) ---
       body: AnimatedContainer(
         duration: const Duration(milliseconds: 800),
         curve: Curves.easeInOut,
@@ -115,15 +143,12 @@ class _HomeScreenState extends State<HomeScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: isTimerRunning
-                ? [
-              const Color(0xFF1A2980), // Lacivert
-              const Color(0xFF26D0CE), // Turkuaz
-            ]
-                : [
-              defaultBgColor,
-              defaultBgColor,
-            ],
+            // Mantık: Alarm çalıyor mu? -> Mor. Çalışıyor mu? -> Mavi. Hiçbiri mi? -> Düz.
+            colors: isAlarmPlaying
+                ? finishedGradient
+                : isTimerRunning
+                ? runningGradient
+                : idleGradient,
           ),
         ),
         child: Stack(
@@ -133,34 +158,36 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // --- ÜST BUTONLAR ---
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                     child: IntrinsicHeight(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Expanded(child: _buildOption(context, timerProvider, "focus".tr(), settingsProvider.workTime, TimerMode.work, isTimerRunning)),
+                          Expanded(child: _buildOption(context, timerProvider, "focus".tr(), settingsProvider.workTime, TimerMode.work, isTimerRunning || isAlarmPlaying)),
                           const SizedBox(width: 10),
-                          Expanded(child: _buildOption(context, timerProvider, "short_break".tr(), settingsProvider.shortBreakTime, TimerMode.shortBreak, isTimerRunning)),
+                          Expanded(child: _buildOption(context, timerProvider, "short_break".tr(), settingsProvider.shortBreakTime, TimerMode.shortBreak, isTimerRunning || isAlarmPlaying)),
                           const SizedBox(width: 10),
-                          Expanded(child: _buildOption(context, timerProvider, "long_break".tr(), settingsProvider.longBreakTime, TimerMode.longBreak, isTimerRunning)),
+                          Expanded(child: _buildOption(context, timerProvider, "long_break".tr(), settingsProvider.longBreakTime, TimerMode.longBreak, isTimerRunning || isAlarmPlaying)),
                         ],
                       ),
                     ),
                   ),
-                  const Spacer(),
 
-                  // --- ORTA ALAN (DAİRE ve SAYAÇ) ---
+                  const Spacer(flex: 2),
+
+                  // --- ORTA ALAN ---
                   Stack(
                     alignment: Alignment.center,
                     children: [
                       // Daire Arka Planı
                       Container(
-                        width: 280,
-                        height: 280,
+                        width: circleSize,
+                        height: circleSize,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: isTimerRunning
+                          color: (isTimerRunning || isAlarmPlaying)
                               ? Colors.white.withOpacity(0.05)
                               : Theme.of(context).cardColor,
                           boxShadow: [
@@ -173,10 +200,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
-                      // Progress Bar (Fluid Animation)
+                      // Progress Bar
                       SizedBox(
-                        width: 260,
-                        height: 260,
+                        width: circleSize - 20,
+                        height: circleSize - 20,
                         child: TweenAnimationBuilder<double>(
                           tween: Tween<double>(
                               begin: 0.0,
@@ -188,11 +215,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             return CircularProgressIndicator(
                               value: value,
                               strokeWidth: 18,
-                              backgroundColor: isTimerRunning
+                              backgroundColor: (isTimerRunning || isAlarmPlaying)
                                   ? Colors.white.withOpacity(0.15)
                                   : (isDark ? Colors.grey.shade800 : const Color(0xFFF0F0F0)),
+
+                              // Alarm çalarken YEŞİL veya BEYAZ yapabiliriz,
+                              // ama Turkuaz morun üstünde de güzel durur.
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                  isTimerRunning
+                                  (isTimerRunning || isAlarmPlaying)
                                       ? accentColor
                                       : Theme.of(context).primaryColor
                               ),
@@ -201,41 +231,52 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         ),
                       ),
-                      // SADECE SÜRE YAZISI
-                      Text(
-                        timerProvider.timeLeftString,
-                        style: TextStyle(
-                          fontFamily: 'BebasNeue',
-                          fontSize: 100,
-                          color: isTimerRunning
-                              ? Colors.white
-                              : Theme.of(context).colorScheme.onSurface,
-                          letterSpacing: 2,
+
+                      // --- SÜRE YAZISI ---
+                      SizedBox(
+                        width: circleSize * 0.70,
+                        child: FittedBox(
+                          fit: BoxFit.contain,
+                          child: Transform.translate(
+                            offset: const Offset(0, 5),
+                            child: Text(
+                              timerProvider.timeLeftString,
+                              style: TextStyle(
+                                fontFamily: 'BebasNeue',
+                                fontSize: timerFontSize,
+                                color: (isTimerRunning || isAlarmPlaying)
+                                    ? Colors.white
+                                    : Theme.of(context).colorScheme.onSurface,
+                                letterSpacing: 2,
+                                height: 1.0,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 15),
 
-                  // --- MOTİVASYON SÖZÜ (SABİT ALAN - ZIPLAMA YOK) ---
+                  // --- MOTİVASYON SÖZÜ ---
                   Container(
-                    height: 80, // Yükseklik sabitlendi!
+                    height: 80,
                     padding: const EdgeInsets.symmetric(horizontal: 30),
-                    alignment: Alignment.center, // Ortala
+                    alignment: Alignment.center,
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 500),
                       child: Text(
                         timerProvider.currentMotivation.tr(),
                         key: ValueKey<String>(timerProvider.currentMotivation),
                         textAlign: TextAlign.center,
-                        maxLines: 3, // En fazla 3 satır olsun
-                        overflow: TextOverflow.ellipsis, // Taşarsa ... koysun
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: 16,
+                          fontSize: isSmallScreen ? 14 : 16,
                           fontWeight: FontWeight.w500,
-                          color: isTimerRunning
+                          color: (isTimerRunning || isAlarmPlaying)
                               ? Colors.white.withOpacity(0.9)
                               : Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
                           letterSpacing: 0.5,
@@ -244,10 +285,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
-                  const Spacer(),
+                  const Spacer(flex: 3),
 
+                  // --- ALT BUTONLAR ---
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 40),
+                    padding: EdgeInsets.only(bottom: isSmallScreen ? 20 : 40),
                     child: Column(
                       children: [
                         // --- ANA BUTON ---
@@ -262,17 +304,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             } else if (timerProvider.isRunning) {
                               timerProvider.stopTimer(reset: false);
                             } else {
-                              // --- GÜNCELLEME: settingsProvider'ı parametre olarak geçiyoruz ---
                               timerProvider.startTimer(settingsProvider);
                             }
                           },
                           child: AnimatedContainer(
-                            // ... burası aynı (tasarım kodu) ...
                             duration: const Duration(milliseconds: 300),
-                            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                            padding: EdgeInsets.symmetric(horizontal: buttonPaddingHorizontal, vertical: buttonPaddingVertical),
                             decoration: BoxDecoration(
                               color: timerProvider.isAlarmPlaying
-                                  ? Colors.green
+                                  ? Colors.green // Bitince Yeşil
                                   : timerProvider.isRunning
                                   ? Colors.white
                                   : Theme.of(context).primaryColor,
@@ -295,9 +335,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ? Icons.pause_rounded
                                       : Icons.play_arrow_rounded,
                                   color: timerProvider.isRunning && !timerProvider.isAlarmPlaying
-                                      ? const Color(0xFF1A2980)
+                                      ? darkNavy
                                       : Colors.white,
-                                  size: 32,
+                                  size: isSmallScreen ? 28 : 32,
                                 ),
                                 const SizedBox(width: 10),
                                 Text(
@@ -310,10 +350,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                       : "start".tr(),
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
-                                    fontSize: 20,
+                                    fontSize: isSmallScreen ? 18 : 20,
                                     fontWeight: FontWeight.bold,
                                     color: timerProvider.isRunning && !timerProvider.isAlarmPlaying
-                                        ? const Color(0xFF1A2980)
+                                        ? darkNavy
                                         : Colors.white,
                                   ),
                                 ),
@@ -322,7 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 15),
 
                         // --- SIFIRLA BUTONU ---
                         IgnorePointer(
@@ -339,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 "reset".tr(),
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
-                                  color: isTimerRunning
+                                  color: (isTimerRunning || isAlarmPlaying)
                                       ? Colors.white.withOpacity(0.6)
                                       : Theme.of(context).dividerColor,
                                   fontWeight: FontWeight.w500,
@@ -369,7 +409,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildOption(BuildContext context, TimerProvider provider, String title, int time, TimerMode mode, bool isRunning) {
+  Widget _buildOption(BuildContext context, TimerProvider provider, String title, int time, TimerMode mode, bool isColoredBackground) {
     return TimeOptionButton(
       title: title,
       minutes: time,
