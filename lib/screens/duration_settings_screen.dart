@@ -13,7 +13,6 @@ class DurationSettingsScreen extends StatefulWidget {
 
 class _DurationSettingsScreenState extends State<DurationSettingsScreen> {
   // Slider değerlerini anlık olarak tutacak yerel değişkenler
-  // Provider'ı her milisaniyede yormamak için.
   double? _tempWorkTime;
   double? _tempShortBreak;
   double? _tempLongBreak;
@@ -21,7 +20,11 @@ class _DurationSettingsScreenState extends State<DurationSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
-    final timerProvider = context.read<TimerProvider>();
+    // TimerProvider'ı izliyoruz (watch) ki sayaç durumu değişince ekran güncellensin
+    final timerProvider = context.watch<TimerProvider>();
+
+    // --- KİLİT KONTROLÜ ---
+    final bool isLocked = timerProvider.isRunning;
 
     // Eğer yerel değişkenler null ise (ilk açılış), provider'dan al
     double currentWork = _tempWorkTime ?? settings.workTime.toDouble();
@@ -42,66 +45,107 @@ class _DurationSettingsScreenState extends State<DurationSettingsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
+      body: Column(
         children: [
-          // 1. Odaklanma Süresi
-          _buildDurationSlider(
-            context,
-            label: "focus".tr(),
-            value: currentWork,
-            min: 10,
-            max: 90,
-            onChanged: (val) {
-              setState(() => _tempWorkTime = val); // Sadece ekranı güncelle (HIZLI)
-            },
-            onChangeEnd: (val) {
-              // Parmak çekilince kaydet (AĞIR İŞLEM)
-              int newValue = val.toInt();
-              settings.setWorkTime(newValue);
-              timerProvider.updateDurationFromSettings(newValue, TimerMode.work);
-              _tempWorkTime = null; // Yerel değeri sıfırla
-            },
-          ),
+          // --- UYARI MESAJI (Sadece kilitliyse görünür) ---
+          if (isLocked)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              margin: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+              decoration: BoxDecoration(
+                color: Colors.orangeAccent.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.orangeAccent),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.lock_outline, color: Colors.orange),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      "Süreleri değiştirmek için sayacı durdurun.", // Çeviriye eklenebilir
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
-          const SizedBox(height: 20),
+          // --- AYARLAR LİSTESİ (KİLİTLENEBİLİR ALAN) ---
+          Expanded(
+            child: IgnorePointer(
+              ignoring: isLocked, // Kilitliyse dokunmayı engelle
+              child: Opacity(
+                opacity: isLocked ? 0.5 : 1.0, // Kilitliyse soluklaştır
+                child: ListView(
+                  padding: const EdgeInsets.all(20),
+                  children: [
+                    // 1. Odaklanma Süresi
+                    _buildDurationSlider(
+                      context,
+                      label: "focus".tr(),
+                      value: currentWork,
+                      min: 10,
+                      max: 90,
+                      onChanged: (val) {
+                        setState(() => _tempWorkTime = val);
+                      },
+                      onChangeEnd: (val) {
+                        int newValue = val.toInt();
+                        settings.setWorkTime(newValue);
+                        timerProvider.updateDurationFromSettings(newValue, TimerMode.work);
+                        _tempWorkTime = null;
+                      },
+                    ),
 
-          // 2. Kısa Mola
-          _buildDurationSlider(
-            context,
-            label: "short_break".tr(),
-            value: currentShort,
-            min: 1,
-            max: 30,
-            onChanged: (val) {
-              setState(() => _tempShortBreak = val);
-            },
-            onChangeEnd: (val) {
-              int newValue = val.toInt();
-              settings.setShortBreakTime(newValue);
-              timerProvider.updateDurationFromSettings(newValue, TimerMode.shortBreak);
-              _tempShortBreak = null;
-            },
-          ),
+                    const SizedBox(height: 20),
 
-          const SizedBox(height: 20),
+                    // 2. Kısa Mola
+                    _buildDurationSlider(
+                      context,
+                      label: "short_break".tr(),
+                      value: currentShort,
+                      min: 1,
+                      max: 30,
+                      onChanged: (val) {
+                        setState(() => _tempShortBreak = val);
+                      },
+                      onChangeEnd: (val) {
+                        int newValue = val.toInt();
+                        settings.setShortBreakTime(newValue);
+                        timerProvider.updateDurationFromSettings(newValue, TimerMode.shortBreak);
+                        _tempShortBreak = null;
+                      },
+                    ),
 
-          // 3. Uzun Mola
-          _buildDurationSlider(
-            context,
-            label: "long_break".tr(),
-            value: currentLong,
-            min: 5,
-            max: 45,
-            onChanged: (val) {
-              setState(() => _tempLongBreak = val);
-            },
-            onChangeEnd: (val) {
-              int newValue = val.toInt();
-              settings.setLongBreakTime(newValue);
-              timerProvider.updateDurationFromSettings(newValue, TimerMode.longBreak);
-              _tempLongBreak = null;
-            },
+                    const SizedBox(height: 20),
+
+                    // 3. Uzun Mola
+                    _buildDurationSlider(
+                      context,
+                      label: "long_break".tr(),
+                      value: currentLong,
+                      min: 5,
+                      max: 45,
+                      onChanged: (val) {
+                        setState(() => _tempLongBreak = val);
+                      },
+                      onChangeEnd: (val) {
+                        int newValue = val.toInt();
+                        settings.setLongBreakTime(newValue);
+                        timerProvider.updateDurationFromSettings(newValue, TimerMode.longBreak);
+                        _tempLongBreak = null;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -115,7 +159,7 @@ class _DurationSettingsScreenState extends State<DurationSettingsScreen> {
         required double min,
         required double max,
         required Function(double) onChanged,
-        required Function(double) onChangeEnd, // Yeni parametre
+        required Function(double) onChangeEnd,
       }) {
     return Card(
       elevation: 0,
@@ -157,8 +201,8 @@ class _DurationSettingsScreenState extends State<DurationSettingsScreen> {
                 max: max,
                 activeColor: Theme.of(context).primaryColor,
                 inactiveColor: Theme.of(context).primaryColor.withOpacity(0.2),
-                onChanged: onChanged, // Anlık değişim (görsel)
-                onChangeEnd: onChangeEnd, // Kayıt işlemi
+                onChanged: onChanged,
+                onChangeEnd: onChangeEnd,
               ),
             ),
           ],
