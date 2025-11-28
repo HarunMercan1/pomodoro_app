@@ -21,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   void initState() {
     super.initState();
 
-    int randomNum = Random().nextInt(8) + 1;
+    int randomNum = Random().nextInt(50) + 1;
     _randomQuoteKey = "quote_$randomNum";
 
     _controller = AnimationController(

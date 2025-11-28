@@ -74,5 +74,27 @@
   "quote_47": "Yaratıcılık bulaşıcıdır, onu başkalarına da bulaştırın. - Einstein",
   "quote_48": "Dahi, karmaşık olanı basitleştirendir. - Einstein",
   "quote_49": "Bugünün işini yarına bırakma, çünkü yarın da bugün gibi olacak.",
-  "quote_50": "Senin sınırın, sadece kendi zihnindir."
+  "quote_50": "Senin sınırın, sadece kendi zihnindir.",
+
+  "music_lock_msg": "Müzik değiştirmek için sayacı durdurun.",
+
+  "sound_alarm": "Klasik Alarm",
+  "sound_digital": "Dijital",
+  "sound_bell3": "Ding Dong",
+  "sound_bell8": "Kristal Zil",
+  "sound_zil1": "Zil 1",
+  "sound_zil2": "Zil 2",
+  "sound_zil3": "Zil 3",
+  "sound_zil4": "Zil 4",
+  "sound_zil5": "Zil 5",
+
+  "sound_forest": "Orman",
+  "sound_ocean": "Okyanus",
+  "sound_rain1": "Çiseleyen Yağmur",
+  "sound_rain2": "Orman Yağmuru",
+  "sound_rain3": "Sağanak",
+  "sound_thunder": "Fırtına",
+  "sound_wind": "Rüzgar"
+
+
 }

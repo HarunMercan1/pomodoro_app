@@ -74,5 +74,25 @@
   "quote_47": "Creativity is contagious, pass it on. - Einstein",
   "quote_48": "Genius is making complex ideas simple. - Einstein",
   "quote_49": "Do not put off for tomorrow what you can do today.",
-  "quote_50": "Your only limit is your mind."
+  "quote_50": "Your only limit is your mind.",
+
+  "music_lock_msg": "Stop the timer to change music.",
+
+  "sound_alarm": "Classic Alarm",
+  "sound_digital": "Digital",
+  "sound_bell3": "Ding Dong",
+  "sound_bell8": "Crystal Bell",
+  "sound_zil1": "Bell 1",
+  "sound_zil2": "Bell 2",
+  "sound_zil3": "Bell 3",
+  "sound_zil4": "Bell 4",
+  "sound_zil5": "Bell 5",
+
+  "sound_forest": "Forest",
+  "sound_ocean": "Ocean",
+  "sound_rain1": "Light Rain",
+  "sound_rain2": "Forest Rain",
+  "sound_rain3": "Heavy Rain",
+  "sound_thunder": "Thunderstorm",
+  "sound_wind": "Wind"
 }

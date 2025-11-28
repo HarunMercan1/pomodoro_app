@@ -9,7 +9,7 @@ class SettingsProvider with ChangeNotifier {
   // --- AYARLAR ---
   bool _isDarkMode = true;
 
-  // Varsayılan Bildirim Sesi (YENİ)
+  // Varsayılan: Artık olmayan 'digital.mp3' yerine 'zil1.mp3' yaptık
   String _notificationSound = 'zil1.mp3';
 
   bool _isBackgroundMusicEnabled = false;
@@ -31,24 +31,25 @@ class SettingsProvider with ChangeNotifier {
   int get shortBreakTime => _shortBreakTime;
   int get longBreakTime => _longBreakTime;
 
-  // --- 1. BİLDİRİM SESLERİ (YENİ DOSYA İSİMLERİNE GÖRE) ---
+  // --- 1. BİLDİRİM SESLERİ (TEMİZLENDİ) ---
+  // Sadece klasörde olan zil1-zil5 arası kaldı.
   final Map<String, String> notificationSounds = {
-    'zil1.mp3': 'Zil 1',
-    'zil2.mp3': 'Zil 2',
-    'zil3.mp3': 'Zil 3',
-    'zil4.mp3': 'Zil 4',
-    'zil5.mp3': 'Zil 5',
+    'zil1.mp3': 'sound_zil1',
+    'zil2.mp3': 'sound_zil2',
+    'zil3.mp3': 'sound_zil3',
+    'zil4.mp3': 'sound_zil4',
+    'zil5.mp3': 'sound_zil5',
   };
 
-  // --- 2. ARKA PLAN MÜZİKLERİ (ÖNCEKİ GİBİ KALDI) ---
+  // --- 2. ARKA PLAN MÜZİKLERİ (TAKAS YAPILDI) ---
   final Map<String, String> backgroundMusics = {
-    'rain2.mp3': 'Çiseleyen Yağmur',
-    'rain1.mp3': 'Orman Yağmuru',
-    'rain3.mp3': 'Sağanak',
-    'thunder.mp3': 'Fırtına',
-    'wind.mp3': 'Rüzgar',
-    'forest.mp3': 'Orman',
-    'ocean.mp3': 'Okyanus',
+    'rain1.mp3': 'sound_rain2', // rain1.mp3 artık "Orman Yağmuru" oldu
+    'rain2.mp3': 'sound_rain1', // rain2.mp3 artık "Çiseleyen Yağmur" oldu
+    'rain3.mp3': 'sound_rain3',
+    'thunder.mp3': 'sound_thunder',
+    'wind.mp3': 'sound_wind',
+    'forest.mp3': 'sound_forest',
+    'ocean.mp3': 'sound_ocean',
   };
 
   SettingsProvider() {
@@ -59,7 +60,7 @@ class SettingsProvider with ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     _isDarkMode = _prefs.getBool('isDarkMode') ?? true;
 
-    // Eğer kayıtlı ses artık yoksa 'zil1.mp3'e dön
+    // Eğer hafızada kalan eski bir dosya varsa (örn: digital.mp3), varsayılan 'zil1.mp3'e dön
     String loadedNotif = _prefs.getString('notificationSound') ?? 'zil1.mp3';
     _notificationSound = notificationSounds.containsKey(loadedNotif) ? loadedNotif : 'zil1.mp3';
 
@@ -81,7 +82,7 @@ class SettingsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // --- BİLDİRİM SESİ SEÇME (PLAY METODU İLE GARANTİ ÇALMA) ---
+  // --- BİLDİRİM SESİ SEÇME ---
   Future<void> setNotificationSound(String soundPath) async {
     _notificationSound = soundPath;
     _prefs.setString('notificationSound', soundPath);
@@ -92,8 +93,6 @@ class SettingsProvider with ChangeNotifier {
     try {
       await _previewPlayer.stop();
       await _previewPlayer.setReleaseMode(ReleaseMode.stop);
-
-      // 'play' metodu anlık çalma için daha kararlıdır
       await _previewPlayer.play(
         AssetSource('sounds/bell/$soundPath'),
         volume: 1.0,

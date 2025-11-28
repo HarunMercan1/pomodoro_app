@@ -12,17 +12,18 @@ class SoundSettingsScreen extends StatefulWidget {
 }
 
 class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
+  // Slider'ın akıcı olması için yerel değişken
   double? _currentSliderValue;
 
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
-    final timerProvider = context.watch<TimerProvider>(); // Watch yaptık ki timer durumunu görelim
+    final timerProvider = context.watch<TimerProvider>();
 
+    // Slider değeri: Yerel değer varsa onu, yoksa Provider'dakini al
     double sliderValue = _currentSliderValue ?? settings.backgroundVolume;
 
-    // --- KİLİT KONTROLÜ ---
-    // Eğer sayaç çalışıyorsa (isRunning) ayarları kilitle
+    // Sayaç çalışıyorsa kilitle
     final bool isLocked = timerProvider.isRunning;
 
     return Scaffold(
@@ -37,14 +38,14 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () {
-            settings.stopPreview();
+            settings.stopPreview(); // Çıkarken sesi sustur
             Navigator.pop(context);
           },
         ),
       ),
       body: Column(
         children: [
-          // --- UYARI MESAJI (Sadece kilitliyse görünür) ---
+          // --- KİLİT UYARI MESAJI ---
           if (isLocked)
             Container(
               width: double.infinity,
@@ -61,7 +62,7 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      "Müzik değiştirmek için sayacı durdurun.", // Çeviriye eklenebilir
+                      "music_lock_msg".tr(), // "Müzik değiştirmek için sayacı durdurun."
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 12,
@@ -73,17 +74,19 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
               ),
             ),
 
-          // --- AYARLAR LİSTESİ ---
+          // --- AYARLAR LİSTESİ (KİLİTLENEBİLİR ALAN) ---
           Expanded(
             child: IgnorePointer(
-              ignoring: isLocked, // Kilitliyse tıklamayı engelle
+              ignoring: isLocked, // Kilitliyse tıklanmasın
               child: Opacity(
-                opacity: isLocked ? 0.5 : 1.0, // Kilitliyse soluk göster
+                opacity: isLocked ? 0.5 : 1.0, // Kilitliyse soluk görünsün
                 child: ListView(
                   padding: const EdgeInsets.all(20),
                   children: [
-                    // MÜZİK BÖLÜMÜ
+
+                    // --- 1. BÖLÜM: MÜZİK ---
                     _buildSectionHeader(context, "background_music".tr()),
+
                     Card(
                       elevation: 0,
                       color: Theme.of(context).cardColor.withOpacity(0.5),
@@ -92,14 +95,19 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
                         padding: const EdgeInsets.all(15),
                         child: Column(
                           children: [
+                            // Aç/Kapa Switch
                             SwitchListTile(
                               title: Text("enable_music".tr(), style: const TextStyle(fontFamily: 'Poppins')),
                               value: settings.isBackgroundMusicEnabled,
                               activeColor: Theme.of(context).primaryColor,
                               onChanged: (val) => settings.toggleBackgroundMusic(val),
                             ),
+
+                            // Müzik Açıksa Gösterilecekler
                             if (settings.isBackgroundMusicEnabled) ...[
                               const Divider(),
+
+                              // Ses Seviyesi Slider
                               Row(
                                 children: [
                                   const Icon(Icons.volume_mute_rounded, size: 20),
@@ -109,10 +117,13 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
                                       min: 0.0,
                                       max: 1.0,
                                       activeColor: Theme.of(context).primaryColor,
+                                      // Canlı Değişim (Hızlı)
                                       onChanged: (val) {
                                         setState(() => _currentSliderValue = val);
                                         settings.setVolumeLive(val);
+                                        timerProvider.updateMusicVolume(val);
                                       },
+                                      // Kayıt (Güvenli)
                                       onChangeEnd: (val) {
                                         settings.saveVolumeToPrefs();
                                         _currentSliderValue = null;
@@ -122,11 +133,15 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
                                   const Icon(Icons.volume_up_rounded, size: 20),
                                 ],
                               ),
+
                               const SizedBox(height: 10),
+
+                              // Müzik Listesi
                               ...settings.backgroundMusics.entries.map((entry) {
                                 final isSelected = settings.backgroundMusic == entry.key;
                                 return ListTile(
-                                  title: Text(entry.value, style: const TextStyle(fontFamily: 'Poppins')),
+                                  // entry.value artık JSON anahtarı (örn: sound_rain1). .tr() ile çeviriyoruz.
+                                  title: Text(entry.value.tr(), style: const TextStyle(fontFamily: 'Poppins')),
                                   leading: Icon(
                                     isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
                                     color: isSelected ? Theme.of(context).primaryColor : null,
@@ -142,8 +157,9 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
 
                     const SizedBox(height: 30),
 
-                    // BİLDİRİM BÖLÜMÜ
+                    // --- 2. BÖLÜM: BİLDİRİM SESLERİ ---
                     _buildSectionHeader(context, "notification_sound".tr()),
+
                     Card(
                       elevation: 0,
                       color: Theme.of(context).cardColor.withOpacity(0.5),
@@ -152,7 +168,8 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
                         children: settings.notificationSounds.entries.map((entry) {
                           final isSelected = settings.notificationSound == entry.key;
                           return ListTile(
-                            title: Text(entry.value, style: const TextStyle(fontFamily: 'Poppins')),
+                            // entry.value JSON anahtarıdır (örn: sound_zil1). .tr() ile çeviriyoruz.
+                            title: Text(entry.value.tr(), style: const TextStyle(fontFamily: 'Poppins')),
                             trailing: isSelected
                                 ? Icon(Icons.check_circle, color: Theme.of(context).primaryColor)
                                 : null,
