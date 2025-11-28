@@ -254,8 +254,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         GestureDetector(
                           onTap: () {
                             if (timerProvider.isAlarmPlaying) {
-                              // --- GÜNCELLEME BURADA ---
-                              // Bitir'e basınca sıradaki moda geçmek için süreleri gönderiyoruz
                               timerProvider.stopAlarm(
                                 workTime: settingsProvider.workTime,
                                 shortBreakTime: settingsProvider.shortBreakTime,
@@ -264,7 +262,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             } else if (timerProvider.isRunning) {
                               timerProvider.stopTimer(reset: false);
                             } else {
-                              timerProvider.startTimer(settingsProvider.selectedSound);
+                              // --- GÜNCELLEME: settingsProvider'ı parametre olarak geçiyoruz ---
+                              timerProvider.startTimer(settingsProvider);
                             }
                           },
                           child: AnimatedContainer(

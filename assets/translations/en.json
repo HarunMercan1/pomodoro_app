@@ -20,6 +20,10 @@
   "classic_bell": "Classic Bell",
   "digital": "Digital",
   "alarm": "Alarm",
+  "sound_settings": "Sound Settings",
+  "background_music": "FOCUS MUSIC",
+  "enable_music": "Background Music",
+  "notification_sound": "NOTIFICATION SOUND",
 
   "quote_1": "A journey of a thousand miles begins with a single step. - Lao Tzu",
   "quote_2": "Excellence is not an act, but a habit. - Aristotle",

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../providers/settings_provider.dart';
-import 'duration_settings_screen.dart'; // Yeni ekranı import ettik
+import 'duration_settings_screen.dart';
+import 'sound_settings_screen.dart'; // Yeni ekranı import et
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -55,8 +56,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-
-          // --- YENİ: SÜRE AYARLARI BUTONU ---
+          // SÜRE AYARLARI
           Card(
             elevation: 2,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -75,6 +75,29 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
 
           const SizedBox(height: 20),
 
+          // SES AYARLARI (YENİ)
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            child: ListTile(
+              leading: const Icon(Icons.music_note_rounded),
+              title: Text("sound_settings".tr(), style: const TextStyle(fontFamily: 'Poppins')),
+              subtitle: Text(
+                settings.isBackgroundMusicEnabled ? "Açık" : "Kapalı",
+                style: const TextStyle(fontSize: 12),
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SoundSettingsScreen()),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
           // DİL AYARI
           Card(
             elevation: 2,
@@ -86,14 +109,12 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _LanguageButton(
-                    langCode: 'tr',
                     flag: '🇹🇷',
                     isSelected: context.locale.languageCode == 'tr',
                     onTap: () => context.setLocale(const Locale('tr')),
                   ),
                   const SizedBox(width: 10),
                   _LanguageButton(
-                    langCode: 'en',
                     flag: '🇺🇸',
                     isSelected: context.locale.languageCode == 'en',
                     onTap: () => context.setLocale(const Locale('en')),
@@ -114,41 +135,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
               secondary: Icon(settings.isDarkMode ? Icons.dark_mode : Icons.light_mode),
               value: settings.isDarkMode,
               activeColor: Theme.of(context).primaryColor,
-              onChanged: (value) {
-                settings.toggleTheme(value);
-              },
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // SES AYARI
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            child: ListTile(
-              leading: const Icon(Icons.music_note),
-              title: Text('sound_label'.tr(), style: const TextStyle(fontFamily: 'Poppins')),
-              trailing: DropdownButton<String>(
-                value: settings.selectedSound,
-                underline: Container(),
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    settings.setSound(newValue);
-                  }
-                },
-                items: settings.soundOptions.entries.map((entry) {
-                  String labelKey = '';
-                  if (entry.key.contains('bell')) labelKey = 'classic_bell';
-                  else if (entry.key.contains('digital')) labelKey = 'digital';
-                  else if (entry.key.contains('alarm')) labelKey = 'alarm';
-
-                  return DropdownMenuItem<String>(
-                    value: entry.key,
-                    child: Text(labelKey.tr(), style: const TextStyle(fontFamily: 'Poppins')),
-                  );
-                }).toList(),
-              ),
+              onChanged: (value) => settings.toggleTheme(value),
             ),
           ),
         ],
@@ -158,18 +145,11 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
 }
 
 class _LanguageButton extends StatelessWidget {
-  final String langCode;
   final String flag;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _LanguageButton({
-    super.key,
-    required this.langCode,
-    required this.flag,
-    required this.isSelected,
-    required this.onTap,
-  });
+  const _LanguageButton({super.key, required this.flag, required this.isSelected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -180,9 +160,7 @@ class _LanguageButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? Theme.of(context).primaryColor.withOpacity(0.2) : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade300,
-          ),
+          border: Border.all(color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade300),
         ),
         child: Text(flag, style: const TextStyle(fontSize: 20)),
       ),
